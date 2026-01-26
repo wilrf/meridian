@@ -1,0 +1,680 @@
+{
+  "generatedAt": "2026-01-26T20:13:45.892Z",
+  "phases": [
+    {
+      "id": "01_foundations",
+      "title": "How Computers Think",
+      "order": 1,
+      "lessons": [
+        {
+          "id": "01_foundations/1.1_what_is_python",
+          "title": "What Is Python?",
+          "path": "python/01_foundations/1.1_what_is_python.md",
+          "order": 1.01,
+          "orderTuple": [
+            1,
+            1,
+            ""
+          ],
+          "exercises": [
+            "1.1",
+            "1.2",
+            "1.3"
+          ],
+          "requires": [],
+          "prev": null,
+          "next": "1.2_variables_and_memory"
+        },
+        {
+          "id": "01_foundations/1.2_variables_and_memory",
+          "title": "Variables and Memory",
+          "path": "python/01_foundations/1.2_variables_and_memory.md",
+          "order": 1.02,
+          "orderTuple": [
+            1,
+            2,
+            ""
+          ],
+          "exercises": [
+            "2.1",
+            "2.2",
+            "2.3"
+          ],
+          "requires": [],
+          "prev": "1.1_what_is_python",
+          "next": "1.3_data_types"
+        },
+        {
+          "id": "01_foundations/1.3_data_types",
+          "title": "Data Types",
+          "path": "python/01_foundations/1.3_data_types.md",
+          "order": 1.03,
+          "orderTuple": [
+            1,
+            3,
+            ""
+          ],
+          "exercises": [
+            "3.1",
+            "3.2",
+            "3.3",
+            "3.4",
+            "3.5",
+            "3.6"
+          ],
+          "requires": [],
+          "prev": "1.2_variables_and_memory",
+          "next": "1.4_operators"
+        },
+        {
+          "id": "01_foundations/1.4_operators",
+          "title": "Operators and Expressions",
+          "path": "python/01_foundations/1.4_operators.md",
+          "order": 1.04,
+          "orderTuple": [
+            1,
+            4,
+            ""
+          ],
+          "exercises": [
+            "4.1",
+            "4.2",
+            "4.3",
+            "4.4"
+          ],
+          "requires": [],
+          "prev": "1.3_data_types",
+          "next": "1.5_control_flow"
+        },
+        {
+          "id": "01_foundations/1.4a_strings",
+          "title": "Strings Deep Dive",
+          "path": "python/01_foundations/1.4a_strings.md",
+          "order": 1.041,
+          "orderTuple": [
+            1,
+            4,
+            "a"
+          ],
+          "exercises": [
+            "4a.1",
+            "4a.2",
+            "4a.3",
+            "4a.4",
+            "4a.5"
+          ],
+          "requires": [],
+          "prev": "1.4_operators",
+          "next": "1.5_control_flow"
+        },
+        {
+          "id": "01_foundations/1.5_control_flow",
+          "title": "Control Flow (if/else)",
+          "path": "python/01_foundations/1.5_control_flow.md",
+          "order": 1.05,
+          "orderTuple": [
+            1,
+            5,
+            ""
+          ],
+          "exercises": [
+            "5.1",
+            "5.2",
+            "5.3",
+            "5.4",
+            "5.5",
+            "5.6",
+            "5.7"
+          ],
+          "requires": [],
+          "prev": "1.4_operators",
+          "next": "1.6_loops"
+        },
+        {
+          "id": "01_foundations/1.6_loops",
+          "title": "Loops",
+          "path": "python/01_foundations/1.6_loops.md",
+          "order": 1.06,
+          "orderTuple": [
+            1,
+            6,
+            ""
+          ],
+          "exercises": [
+            "6.1",
+            "6.10",
+            "6.2",
+            "6.3",
+            "6.4",
+            "6.5",
+            "6.6",
+            "6.7",
+            "6.8",
+            "6.9"
+          ],
+          "requires": [],
+          "prev": "1.5_control_flow",
+          "next": "1.7_project_number_analyzer"
+        },
+        {
+          "id": "01_foundations/1.7_project_number_analyzer",
+          "title": "Project 1.7: Number Analyzer",
+          "path": "python/01_foundations/1.7_project_number_analyzer/README.md",
+          "order": 1.07,
+          "orderTuple": [
+            1,
+            7,
+            ""
+          ],
+          "exercises": [],
+          "requires": [],
+          "prev": "01_foundations/1.6_loops",
+          "next": null
+        }
+      ]
+    },
+    {
+      "id": "02_data_structures",
+      "title": "Organizing Data",
+      "order": 2,
+      "lessons": [
+        {
+          "id": "02_data_structures/2.1_lists",
+          "title": "Lists",
+          "path": "python/02_data_structures/2.1_lists.md",
+          "order": 2.01,
+          "orderTuple": [
+            2,
+            1,
+            ""
+          ],
+          "exercises": [
+            "2.1",
+            "2.2",
+            "2.3",
+            "2.4"
+          ],
+          "requires": [],
+          "prev": "1.6_loops",
+          "next": "2.2_dictionaries"
+        },
+        {
+          "id": "02_data_structures/2.2_dictionaries",
+          "title": "Dictionaries",
+          "path": "python/02_data_structures/2.2_dictionaries.md",
+          "order": 2.02,
+          "orderTuple": [
+            2,
+            2,
+            ""
+          ],
+          "exercises": [
+            "2.2",
+            "2.2.1",
+            "2.2.2",
+            "2.2.3",
+            "2.2.4"
+          ],
+          "requires": [],
+          "prev": "2.1_lists",
+          "next": "2.3_sets_and_tuples"
+        },
+        {
+          "id": "02_data_structures/2.3_sets_and_tuples",
+          "title": "Sets and Tuples",
+          "path": "python/02_data_structures/2.3_sets_and_tuples.md",
+          "order": 2.03,
+          "orderTuple": [
+            2,
+            3,
+            ""
+          ],
+          "exercises": [
+            "2.3.1",
+            "2.3.2"
+          ],
+          "requires": [],
+          "prev": "2.2_dictionaries",
+          "next": "2.4_functions"
+        },
+        {
+          "id": "02_data_structures/2.3a_error_handling",
+          "title": "Error Handling",
+          "path": "python/02_data_structures/2.3a_error_handling.md",
+          "order": 2.0309999999999997,
+          "orderTuple": [
+            2,
+            3,
+            "a"
+          ],
+          "exercises": [
+            "2.3a.1",
+            "2.3a.2",
+            "2.3a.3",
+            "2.3a.4"
+          ],
+          "requires": [],
+          "prev": "2.3_sets_and_tuples",
+          "next": "2.4_functions"
+        },
+        {
+          "id": "02_data_structures/2.4_functions",
+          "title": "Functions",
+          "path": "python/02_data_structures/2.4_functions.md",
+          "order": 2.04,
+          "orderTuple": [
+            2,
+            4,
+            ""
+          ],
+          "exercises": [
+            "2.4.1",
+            "2.4.2",
+            "2.4.3",
+            "2.4.4",
+            "4.1",
+            "4.2",
+            "4.3",
+            "4.4"
+          ],
+          "requires": [],
+          "prev": "2.3_sets_and_tuples",
+          "next": "2.5_classes"
+        },
+        {
+          "id": "02_data_structures/2.5_classes",
+          "title": "Classes",
+          "path": "python/02_data_structures/2.5_classes.md",
+          "order": 2.05,
+          "orderTuple": [
+            2,
+            5,
+            ""
+          ],
+          "exercises": [
+            "2.5.1",
+            "2.5.2",
+            "2.5.3",
+            "6.1",
+            "6.2",
+            "6.3"
+          ],
+          "requires": [],
+          "prev": "2.4_functions",
+          "next": "3.1_files"
+        },
+        {
+          "id": "02_data_structures/2.6_project_portfolio_tracker",
+          "title": "Project 2.6: Portfolio Tracker",
+          "path": "python/02_data_structures/2.6_project_portfolio_tracker/README.md",
+          "order": 2.06,
+          "orderTuple": [
+            2,
+            6,
+            ""
+          ],
+          "exercises": [],
+          "requires": [],
+          "prev": "02_data_structures/2.5_classes",
+          "next": null
+        }
+      ]
+    },
+    {
+      "id": "03_external_world",
+      "title": "The External World",
+      "order": 3,
+      "lessons": [
+        {
+          "id": "03_external_world/3.1_modules_and_imports",
+          "title": "Modules and Imports",
+          "path": "python/03_external_world/3.1_modules_and_imports.md",
+          "order": 3.01,
+          "orderTuple": [
+            3,
+            1,
+            ""
+          ],
+          "exercises": [
+            "3.1"
+          ],
+          "requires": [],
+          "prev": "2.5_classes",
+          "next": "3.2_virtual_environments"
+        },
+        {
+          "id": "03_external_world/3.1a_csv_json",
+          "title": "CSV and JSON",
+          "path": "python/03_external_world/3.1a_csv_json.md",
+          "order": 3.0109999999999997,
+          "orderTuple": [
+            3,
+            1,
+            "a"
+          ],
+          "exercises": [
+            "3.1a.1",
+            "3.1a.2",
+            "3.1a.3",
+            "3.1a.4"
+          ],
+          "requires": [],
+          "prev": "3.1_files",
+          "next": "3.2_apis"
+        },
+        {
+          "id": "03_external_world/3.2_virtual_environments",
+          "title": "Virtual Environments",
+          "path": "python/03_external_world/3.2_virtual_environments.md",
+          "order": 3.02,
+          "orderTuple": [
+            3,
+            2,
+            ""
+          ],
+          "exercises": [
+            "3.2"
+          ],
+          "requires": [],
+          "prev": "3.1_modules_and_imports",
+          "next": "3.3_files"
+        },
+        {
+          "id": "03_external_world/3.3_files",
+          "title": "Files",
+          "path": "python/03_external_world/3.3_files.md",
+          "order": 3.03,
+          "orderTuple": [
+            3,
+            3,
+            ""
+          ],
+          "exercises": [
+            "1.1",
+            "1.2",
+            "1.3",
+            "3.1.1",
+            "3.1.2",
+            "3.1.3"
+          ],
+          "requires": [],
+          "prev": "3.2_virtual_environments",
+          "next": "3.4_apis"
+        },
+        {
+          "id": "03_external_world/3.4_apis",
+          "title": "APIs",
+          "path": "python/03_external_world/3.4_apis.md",
+          "order": 3.04,
+          "orderTuple": [
+            3,
+            4,
+            ""
+          ],
+          "exercises": [
+            "3.2.1",
+            "3.2.2",
+            "3.2.3",
+            "5.1",
+            "5.2",
+            "5.3"
+          ],
+          "requires": [
+            "requests"
+          ],
+          "prev": "3.3_files",
+          "next": "3.5_debugging"
+        },
+        {
+          "id": "03_external_world/3.5_debugging",
+          "title": "Debugging",
+          "path": "python/03_external_world/3.5_debugging.md",
+          "order": 3.05,
+          "orderTuple": [
+            3,
+            5,
+            ""
+          ],
+          "exercises": [
+            "3.5"
+          ],
+          "requires": [],
+          "prev": "3.4_apis",
+          "next": "3.6_testing"
+        },
+        {
+          "id": "03_external_world/3.6_testing",
+          "title": "Testing",
+          "path": "python/03_external_world/3.6_testing.md",
+          "order": 3.06,
+          "orderTuple": [
+            3,
+            6,
+            ""
+          ],
+          "exercises": [
+            "3.6"
+          ],
+          "requires": [
+            "pytest"
+          ],
+          "prev": "3.5_debugging",
+          "next": "3.7_project_stock_fetcher"
+        },
+        {
+          "id": "03_external_world/3.7_project_stock_fetcher",
+          "title": "Project 3.7: Stock Fetcher",
+          "path": "python/03_external_world/3.7_project_stock_fetcher/README.md",
+          "order": 3.07,
+          "orderTuple": [
+            3,
+            7,
+            ""
+          ],
+          "exercises": [
+            "4.1",
+            "4.2",
+            "4.3"
+          ],
+          "requires": [],
+          "prev": "03_external_world/3.6_testing",
+          "next": null
+        }
+      ]
+    },
+    {
+      "id": "04_data_analysis",
+      "title": "Data Analysis",
+      "order": 4,
+      "lessons": [
+        {
+          "id": "04_data_analysis/4.1_numpy",
+          "title": "NumPy",
+          "path": "python/04_data_analysis/4.1_numpy.md",
+          "order": 4.01,
+          "orderTuple": [
+            4,
+            1,
+            ""
+          ],
+          "exercises": [
+            "1.1",
+            "1.2",
+            "1.3",
+            "4.1.1",
+            "4.1.2",
+            "4.1.3"
+          ],
+          "requires": [
+            "numpy"
+          ],
+          "prev": "3.2_apis",
+          "next": "4.2_pandas"
+        },
+        {
+          "id": "04_data_analysis/4.2_pandas",
+          "title": "Pandas",
+          "path": "python/04_data_analysis/4.2_pandas.md",
+          "order": 4.02,
+          "orderTuple": [
+            4,
+            2,
+            ""
+          ],
+          "exercises": [
+            "2.1",
+            "2.2",
+            "2.3",
+            "4.2.1",
+            "4.2.2",
+            "4.2.3"
+          ],
+          "requires": [
+            "pandas"
+          ],
+          "prev": "4.1_numpy",
+          "next": "5.1_linear_regression"
+        },
+        {
+          "id": "04_data_analysis/4.3_project_financial_analyzer",
+          "title": "Project 4.3: Financial Data Analyzer",
+          "path": "python/04_data_analysis/4.3_project_financial_analyzer/README.md",
+          "order": 4.03,
+          "orderTuple": [
+            4,
+            3,
+            ""
+          ],
+          "exercises": [
+            "4.3.1",
+            "4.3.2",
+            "4.3.3",
+            "4.3.4"
+          ],
+          "requires": [],
+          "prev": "04_data_analysis/4.2_pandas",
+          "next": null
+        }
+      ]
+    },
+    {
+      "id": "05_machine_learning",
+      "title": "Machine Learning",
+      "order": 5,
+      "lessons": [
+        {
+          "id": "05_machine_learning/5.1_linear_regression",
+          "title": "Linear Regression",
+          "path": "python/05_machine_learning/5.1_linear_regression.md",
+          "order": 5.01,
+          "orderTuple": [
+            5,
+            1,
+            ""
+          ],
+          "exercises": [
+            "3.1",
+            "3.2",
+            "3.3",
+            "5.1.1",
+            "5.1.2",
+            "5.1.3"
+          ],
+          "requires": [
+            "numpy",
+            "scikit-learn"
+          ],
+          "prev": "4.2_pandas",
+          "next": "05_machine_learning/5.2_project_predictor"
+        },
+        {
+          "id": "05_machine_learning/5.2_project_predictor",
+          "title": "Project 5.2: ML Price Predictor",
+          "path": "python/05_machine_learning/5.2_project_predictor/README.md",
+          "order": 5.02,
+          "orderTuple": [
+            5,
+            2,
+            ""
+          ],
+          "exercises": [
+            "5.2.1",
+            "5.2.2",
+            "5.2.3",
+            "5.2.4"
+          ],
+          "requires": [],
+          "prev": "05_machine_learning/5.1_linear_regression",
+          "next": null
+        }
+      ]
+    },
+    {
+      "id": "06_capstones",
+      "title": "Capstone Projects",
+      "order": 6,
+      "lessons": [
+        {
+          "id": "06_capstones/README",
+          "title": "Capstones Overview",
+          "path": "python/06_capstones/README.md",
+          "order": 0,
+          "orderTuple": [
+            0,
+            0,
+            ""
+          ],
+          "exercises": [],
+          "requires": [],
+          "prev": null,
+          "next": "06_capstones/6.1_monte_carlo_simulator"
+        },
+        {
+          "id": "06_capstones/6.1_monte_carlo_simulator",
+          "title": "Capstone 6.1: Monte Carlo Portfolio Simulator",
+          "path": "python/06_capstones/6.1_monte_carlo_simulator/README.md",
+          "order": 6.01,
+          "orderTuple": [
+            6,
+            1,
+            ""
+          ],
+          "exercises": [],
+          "requires": [],
+          "prev": "06_capstones/README",
+          "next": "06_capstones/6.2_sentiment_analyzer"
+        },
+        {
+          "id": "06_capstones/6.2_sentiment_analyzer",
+          "title": "Capstone 6.2: News Sentiment Analyzer",
+          "path": "python/06_capstones/6.2_sentiment_analyzer/README.md",
+          "order": 6.02,
+          "orderTuple": [
+            6,
+            2,
+            ""
+          ],
+          "exercises": [],
+          "requires": [],
+          "prev": "06_capstones/6.1_monte_carlo_simulator",
+          "next": "06_capstones/6.3_backtesting_system"
+        },
+        {
+          "id": "06_capstones/6.3_backtesting_system",
+          "title": "Capstone 6.3: Backtesting Trading Strategy",
+          "path": "python/06_capstones/6.3_backtesting_system/README.md",
+          "order": 6.03,
+          "orderTuple": [
+            6,
+            3,
+            ""
+          ],
+          "exercises": [],
+          "requires": [],
+          "prev": "06_capstones/6.2_sentiment_analyzer",
+          "next": null
+        }
+      ]
+    }
+  ]
+}

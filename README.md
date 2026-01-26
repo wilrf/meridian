@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Meridian
+
+An interactive Python learning platform with in-browser code execution and cloud progress sync.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+
+## Features
+
+- **In-Browser Python** - Run Python directly in the browser via Pyodide (WebAssembly)
+- **Exercise Validation** - Automatic checking with expected output or assertions
+- **Progress Sync** - Sign in with GitHub to sync progress across devices
+- **Monaco Editor** - VS Code-like editing experience
+- **Dark/Light Themes** - Ivory (light) and Velvet (dark) themes
+
+## Tech Stack
+
+- **Next.js 14** - React framework with App Router
+- **Supabase** - Authentication and cloud storage
+- **Pyodide** - Python runtime in WebAssembly
+- **Monaco Editor** - Code editor
+- **Tailwind CSS** - Styling
+- **TypeScript** - Type safety
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Copy environment template
+cp .env.example .env
+
+# Add your Supabase credentials to .env
+# Get them from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous/public key |
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+├── src/                    # Source code
+│   ├── app/               # Next.js App Router
+│   ├── components/        # React components
+│   ├── lib/               # Utilities and contexts
+│   │   └── supabase/      # Supabase clients
+│   └── content/           # Curriculum & manifest
+├── public/                # Static assets & workers
+├── scripts/               # Build scripts
+└── data/                  # Local progress (gitignored)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
 
-## Deploy on Vercel
+## Authentication
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Users can optionally sign in with GitHub to sync progress across devices. Without signing in, progress is stored locally.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+To enable GitHub OAuth:
+1. Create a GitHub OAuth App
+2. Configure the provider in Supabase Dashboard → Auth → Providers
+3. Set the callback URL to `https://YOUR_PROJECT.supabase.co/auth/v1/callback`
+
+## License
+
+[MIT](LICENSE)
