@@ -19,39 +19,7 @@ interface LightEditorProps {
   ariaLabel?: string
 }
 
-// Character width for monospace font at 14px
-const CHAR_WIDTH = 8.4 // JetBrains Mono average char width
 const LINE_HEIGHT = 24 // 14px * 1.75 line-height
-
-/**
- * Measure text width using a hidden span
- */
-function createTextMeasurer() {
-  if (typeof document === 'undefined') return { measure: () => 0 }
-
-  const span = document.createElement('span')
-  span.style.cssText = `
-    position: absolute;
-    visibility: hidden;
-    font-family: var(--font-jetbrains-mono), "JetBrains Mono", "Fira Code", monospace;
-    font-size: 14px;
-    white-space: pre;
-  `
-  document.body.appendChild(span)
-
-  return {
-    measure: (text: string): number => {
-      span.textContent = text
-      return span.getBoundingClientRect().width
-    },
-  }
-}
-
-let measurer: ReturnType<typeof createTextMeasurer> | null = null
-function getMeasurer() {
-  if (!measurer) measurer = createTextMeasurer()
-  return measurer
-}
 
 function LightEditorInner({
   value,
@@ -77,8 +45,17 @@ function LightEditorInner({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const visualRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const measurerRef = useRef<HTMLSpanElement>(null)
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onRunRef = useRef(onRun)
+
+  // Measure text width using a span inside the editor (same font context)
+  const measureText = useCallback((text: string): number => {
+    const measurer = measurerRef.current
+    if (!measurer) return 0
+    measurer.textContent = text
+    return measurer.getBoundingClientRect().width
+  }, [])
 
   // Keep onRun ref current
   useEffect(() => {
@@ -119,12 +96,12 @@ function LightEditorInner({
 
     const text = textarea.value
     const pos = textarea.selectionStart
-    const { line, col } = getCursorInfo(text, pos)
+    const { line } = getCursorInfo(text, pos)
 
     // Measure text width for accurate positioning
     const lines = text.substring(0, pos).split('\n')
     const currentLineText = lines[lines.length - 1] ?? ''
-    const x = getMeasurer().measure(currentLineText)
+    const x = measureText(currentLineText)
     const y = line * LINE_HEIGHT
 
     setCursorPosition({ x, y })
@@ -157,7 +134,7 @@ function LightEditorInner({
     setIsTyping(true)
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
     typingTimerRef.current = setTimeout(() => setIsTyping(false), 400)
-  }, [getCursorInfo, getCurrentWord, readOnly])
+  }, [getCursorInfo, getCurrentWord, readOnly, measureText])
 
   // Handle input change
   const handleInput = useCallback(() => {
@@ -347,6 +324,13 @@ function LightEditorInner({
 
       {/* Editor content */}
       <div className="light-editor-content">
+        {/* Hidden span for text measurement (inherits editor font) */}
+        <span
+          ref={measurerRef}
+          className="light-editor-measurer"
+          aria-hidden="true"
+        />
+
         {/* Hidden textarea for input */}
         <textarea
           ref={textareaRef}

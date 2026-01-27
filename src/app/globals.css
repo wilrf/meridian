@@ -399,11 +399,11 @@ body,
 /* === CODE BLOCKS === */
 pre {
   font-family: var(--font-mono);
-  font-size: 0.875rem;
-  line-height: 1.625;
+  font-size: 14px;
+  line-height: 1.75;
   background: var(--editor-bg);
   color: var(--editor-text);
-  padding: 1.25rem;
+  padding: 1rem 1.25rem;
   border-radius: var(--radius-lg);
   overflow-x: auto;
 }
@@ -1243,6 +1243,16 @@ code:not(pre code) {
   padding: 16px;
   min-height: 100%;
   overflow: hidden;
+}
+
+/* Hidden span for text measurement - must inherit editor font exactly */
+.light-editor-measurer {
+  position: absolute;
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+  white-space: pre;
+  /* Inherits font-family, font-size, line-height from .light-editor */
 }
 
 /* Hidden textarea for input capture */
