@@ -122,10 +122,15 @@ export function getLesson(slugParts: string[]): Lesson | null {
     return null
   }
 
-  // Validate each part is a non-empty string
+  // Validate each part is a non-empty string and doesn't contain path traversal
   for (const part of slugParts) {
     if (typeof part !== 'string' || part.length === 0) {
       console.warn(`Invalid slug part: ${part}`)
+      return null
+    }
+    // Prevent path traversal attacks
+    if (part === '..' || part === '.' || part.includes('/') || part.includes('\\')) {
+      console.warn(`Path traversal attempt detected: ${part}`)
       return null
     }
   }
@@ -139,6 +144,13 @@ export function getLesson(slugParts: string[]): Lesson | null {
   ]
 
   for (const filePath of possiblePaths) {
+    // Extra security: verify resolved path is within CONTENT_DIR
+    const resolvedPath = path.resolve(filePath)
+    if (!resolvedPath.startsWith(CONTENT_DIR)) {
+      console.warn(`Path traversal attempt: ${filePath} resolves outside content directory`)
+      continue
+    }
+
     if (fs.existsSync(filePath)) {
       try {
         const fileContent = fs.readFileSync(filePath, 'utf-8')

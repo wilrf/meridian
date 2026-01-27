@@ -1,9 +1,11 @@
 'use client'
 
+import { useMemo } from 'react'
 import Link from 'next/link'
 import { useProgress } from '@/lib/use-progress'
 import manifest from '@/content/manifest.json'
 import StatsBar from './StatsBar'
+import MeridianLogo from '@/components/MeridianLogo'
 
 interface Lesson {
   id: string
@@ -21,10 +23,16 @@ export default function Dashboard() {
   const { progress, loading: progressLoading } = useProgress()
   const phases = manifest.phases as Phase[]
 
-  const totalLessons = phases.reduce((sum, p) => sum + p.lessons.length, 0)
-  const completedLessons = progress
-    ? Object.values(progress.lessons).filter((l) => l.status === 'completed').length
-    : 0
+  const totalLessons = useMemo(
+    () => phases.reduce((sum, p) => sum + p.lessons.length, 0),
+    [phases]
+  )
+  const completedLessons = useMemo(
+    () => progress
+      ? Object.values(progress.lessons).filter((l) => l.status === 'completed').length
+      : 0,
+    [progress]
+  )
 
   return (
     <div className="min-h-screen bg-[var(--bg-canvas)]">
@@ -41,7 +49,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="hidden lg:block">
-              <PythonLogo />
+              <MeridianBrandLogo />
             </div>
           </div>
         </div>
@@ -80,13 +88,10 @@ export default function Dashboard() {
   )
 }
 
-function PythonLogo() {
+function MeridianBrandLogo() {
   return (
-    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-navy-800 to-accent flex items-center justify-center shadow-soft">
-      <svg viewBox="0 0 24 24" className="w-10 h-10 text-white" fill="currentColor">
-        <path d="M12 0C5.373 0 5.5 2.727 5.5 2.727v2.727h6.5v.91H4.09S0 5.91 0 12s3.545 6.09 3.545 6.09h2.182v-2.91s-.118-3.545 3.5-3.545h6.045s3.364.055 3.364-3.273V3.09S19.09 0 12 0zm-2.727 1.818c.5 0 .91.41.91.91s-.41.909-.91.909-.909-.41-.909-.91.41-.909.91-.909z"/>
-        <path d="M12 24c6.627 0 6.5-2.727 6.5-2.727v-2.727h-6.5v-.91h7.91S24 18.09 24 12s-3.545-6.09-3.545-6.09h-2.182v2.91s.118 3.545-3.5 3.545H8.727s-3.364-.055-3.364 3.273v5.273S4.91 24 12 24zm2.727-1.818c-.5 0-.91-.41-.91-.91s.41-.909.91-.909.909.41.909.91-.41.909-.91.909z"/>
-      </svg>
+    <div className="w-16 h-16 rounded-2xl bg-[#1E3A5F] flex items-center justify-center shadow-soft">
+      <MeridianLogo size="md" className="text-white" />
     </div>
   )
 }
@@ -106,7 +111,8 @@ function PhaseCard({
     (sum, lesson) => sum + lesson.exercises.length,
     0
   )
-  const firstLesson = phase.lessons[0]
+  // Safe access with undefined check
+  const firstLesson = phase.lessons.length > 0 ? phase.lessons[0] : undefined
 
   const completedLessons = phase.lessons.filter(
     (lesson) => progress?.lessons[lesson.id]?.status === 'completed'
@@ -123,7 +129,7 @@ function PhaseCard({
 
   const nextLesson = phase.lessons.find(
     (lesson) => progress?.lessons[lesson.id]?.status !== 'completed'
-  ) ?? firstLesson
+  ) ?? firstLesson ?? null
 
   const getStatusColor = () => {
     if (percentage === 100) return 'success'

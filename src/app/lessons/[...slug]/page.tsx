@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation'
 import { getLesson, getAllLessonSlugs, getAdjacentLessons } from '@/lib/lessons'
 import LessonRenderer from '@/components/LessonRenderer'
 import LessonNav from '@/components/LessonNav'
+import PyodidePreloader from '@/components/PyodidePreloader'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 interface PageProps {
   params: Promise<{ slug: string[] }>
@@ -38,7 +40,12 @@ export default async function LessonPage({ params }: PageProps) {
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-12">
-      <LessonRenderer content={lesson.content} lessonId={lesson.slug} />
+      {/* Preload Pyodide when lesson page mounts */}
+      <PyodidePreloader />
+
+      <ErrorBoundary>
+        <LessonRenderer content={lesson.content} lessonId={lesson.slug} />
+      </ErrorBoundary>
       <LessonNav prev={prev} next={next} />
     </div>
   )

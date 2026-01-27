@@ -7,8 +7,13 @@ import {
   useState,
   useCallback,
   useRef,
+  useMemo,
   type ReactNode,
 } from 'react'
+
+// =============================================================================
+// Types
+// =============================================================================
 
 interface PyodideState {
   status: 'idle' | 'loading' | 'ready' | 'error'
@@ -30,6 +35,8 @@ interface ValidationResult {
 
 interface PyodideContextValue {
   state: PyodideState
+  /** Manually trigger Pyodide initialization */
+  initialize: () => void
   runCode: (code: string) => Promise<RunResult>
   validateCode: (userCode: string, validateCode: string) => Promise<ValidationResult>
   checkExpected: (userCode: string, expected: string) => Promise<ValidationResult>
@@ -37,11 +44,18 @@ interface PyodideContextValue {
   restartWorker: () => void
 }
 
-const PyodideContext = createContext<PyodideContextValue | null>(null)
+// =============================================================================
+// Constants
+// =============================================================================
 
-// Grace period after timeout before terminating worker
 const TIMEOUT_GRACE_MS = 1000
 const EXECUTION_TIMEOUT_MS = 5000
+
+// =============================================================================
+// Context
+// =============================================================================
+
+const PyodideContext = createContext<PyodideContextValue | null>(null)
 
 export function usePyodide() {
   const context = useContext(PyodideContext)
@@ -51,33 +65,42 @@ export function usePyodide() {
   return context
 }
 
+// =============================================================================
+// Provider
+// =============================================================================
+
 interface PyodideProviderProps {
   children: ReactNode
+  /** If true, Pyodide loads immediately. If false, waits for initialize() call. */
+  eager?: boolean
 }
 
-export function PyodideProvider({ children }: PyodideProviderProps) {
+export function PyodideProvider({ children, eager = false }: PyodideProviderProps) {
   const [state, setState] = useState<PyodideState>({
     status: 'idle',
     error: null,
     loadingProgress: '',
   })
 
-  // Use ref for status to avoid stale closure issues
+  // Refs for stable access across closures
   const statusRef = useRef<PyodideState['status']>('idle')
-  useEffect(() => {
-    statusRef.current = state.status
-  }, [state.status])
-
   const workerRef = useRef<Worker | null>(null)
   const pendingRef = useRef<Map<number, { resolve: (value: unknown) => void; reject: (error: Error) => void }>>(
     new Map()
   )
   const messageIdRef = useRef(0)
   const timeoutGraceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const initializationStartedRef = useRef(false)
 
-  /**
-   * Clear all pending promises (on error or termination)
-   */
+  // Keep status ref in sync
+  useEffect(() => {
+    statusRef.current = state.status
+  }, [state.status])
+
+  // =============================================================================
+  // Worker Management
+  // =============================================================================
+
   const clearPendingPromises = useCallback((errorMessage: string) => {
     pendingRef.current.forEach(({ reject }) => {
       reject(new Error(errorMessage))
@@ -85,123 +108,108 @@ export function PyodideProvider({ children }: PyodideProviderProps) {
     pendingRef.current.clear()
   }, [])
 
-  /**
-   * Terminate current worker and restart
-   */
-  const terminateAndRestart = useCallback(() => {
-    // Clear any grace period timeout
+  const terminateWorker = useCallback(() => {
     if (timeoutGraceRef.current) {
       clearTimeout(timeoutGraceRef.current)
       timeoutGraceRef.current = null
     }
-
-    // Reject all pending promises
-    clearPendingPromises('Worker terminated due to timeout')
-
-    // Terminate current worker
+    clearPendingPromises('Worker terminated')
     if (workerRef.current) {
       workerRef.current.terminate()
       workerRef.current = null
     }
-
-    // Restart will happen via initializeWorker
-    setState({
-      status: 'loading',
-      error: null,
-      loadingProgress: 'Restarting Python...',
-    })
   }, [clearPendingPromises])
 
-  // Send message to worker and wait for response (stable reference via ref)
+  // Send message helper (stored in ref for stable reference)
   const sendMessageRef = useRef<(<T>(type: string, payload: Record<string, unknown>) => Promise<T>) | null>(null)
 
-  sendMessageRef.current = <T,>(type: string, payload: Record<string, unknown>): Promise<T> => {
-    return new Promise((resolve, reject) => {
-      if (!workerRef.current) {
-        reject(new Error('Worker not initialized'))
-        return
-      }
-
-      // Check current status via ref (not stale closure)
-      if (statusRef.current === 'error') {
-        reject(new Error('Worker is in error state'))
-        return
-      }
-
-      const id = ++messageIdRef.current
-      pendingRef.current.set(id, {
-        resolve: resolve as (value: unknown) => void,
-        reject,
-      })
-      workerRef.current.postMessage({ id, type, payload })
-    })
-  }
-
   /**
-   * Initialize the worker
+   * Initialize the Pyodide worker
+   * This is the main entry point - called either eagerly or lazily
    */
   const initializeWorker = useCallback(() => {
     if (typeof window === 'undefined') return
+    if (initializationStartedRef.current) return // Prevent double initialization
+    
+    initializationStartedRef.current = true
+    
+    // Clean up existing worker
+    terminateWorker()
 
-    // Clean up existing worker if any
-    if (workerRef.current) {
-      workerRef.current.terminate()
-      workerRef.current = null
-    }
-
-    setState((s) => ({ ...s, status: 'loading', loadingProgress: 'Starting Python...' }))
+    setState(s => ({ ...s, status: 'loading', loadingProgress: 'Starting Python runtime...' }))
 
     const worker = new Worker('/workers/pyodide.worker.js')
     workerRef.current = worker
 
+    // Set up message handler
+    sendMessageRef.current = <T,>(type: string, payload: Record<string, unknown>): Promise<T> => {
+      return new Promise((resolve, reject) => {
+        if (!workerRef.current) {
+          reject(new Error('Worker not initialized'))
+          return
+        }
+        if (statusRef.current === 'error') {
+          reject(new Error('Worker is in error state'))
+          return
+        }
+
+        const id = ++messageIdRef.current
+        pendingRef.current.set(id, {
+          resolve: resolve as (value: unknown) => void,
+          reject,
+        })
+        workerRef.current.postMessage({ id, type, payload })
+      })
+    }
+
     worker.onmessage = (event) => {
       const { id, type, success, result, error } = event.data
 
-      // Handle ready signal
+      // Handle ready signal - initialize Pyodide
       if (type === 'ready') {
-        // Initialize Pyodide
-        sendMessageRef.current?.('init', {}).then(() => {
-          setState({
-            status: 'ready',
-            error: null,
-            loadingProgress: '',
+        setState(s => ({ ...s, loadingProgress: 'Loading Python (~10MB)...' }))
+        
+        sendMessageRef.current?.('init', {})
+          .then(() => {
+            setState({
+              status: 'ready',
+              error: null,
+              loadingProgress: '',
+            })
           })
-        }).catch((err) => {
-          setState({
-            status: 'error',
-            error: err.message || 'Failed to initialize',
-            loadingProgress: '',
+          .catch((err) => {
+            setState({
+              status: 'error',
+              error: err.message || 'Failed to initialize',
+              loadingProgress: '',
+            })
           })
-        })
         return
       }
 
-      // Handle timeout warning from worker
+      // Handle timeout warning
       if (type === 'timeout_warning') {
-        // Give worker a grace period, then terminate if still stuck
         if (timeoutGraceRef.current) {
           clearTimeout(timeoutGraceRef.current)
         }
         timeoutGraceRef.current = setTimeout(() => {
-          console.warn('Worker did not respond after timeout grace period, restarting...')
-          terminateAndRestart()
-          // Re-initialize after termination
+          console.warn('Worker timeout, restarting...')
+          initializationStartedRef.current = false
+          terminateWorker()
+          setState({ status: 'loading', error: null, loadingProgress: 'Restarting Python...' })
           initializeWorker()
         }, TIMEOUT_GRACE_MS)
         return
       }
 
-      // Handle responses to our messages
+      // Handle responses
       const pending = pendingRef.current.get(id)
       if (pending) {
         pendingRef.current.delete(id)
-
-        // Clear grace period if we got a response
         if (timeoutGraceRef.current) {
           clearTimeout(timeoutGraceRef.current)
           timeoutGraceRef.current = null
         }
-
         if (success) {
           pending.resolve(result)
         } else {
@@ -211,182 +219,192 @@ export function PyodideProvider({ children }: PyodideProviderProps) {
     }
 
     worker.onerror = (error) => {
-      // Clear all pending promises to prevent memory leaks
       clearPendingPromises(`Worker error: ${error.message || 'Unknown error'}`)
-
       setState({
         status: 'error',
         error: error.message || 'Worker error',
         loadingProgress: '',
       })
     }
-  }, [clearPendingPromises, terminateAndRestart])
+  }, [terminateWorker, clearPendingPromises])
 
-  // Initialize worker on mount
-  useEffect(() => {
-    initializeWorker()
+  // =============================================================================
+  // Public API
+  // =============================================================================
 
-    return () => {
-      // Clean up on unmount
-      if (timeoutGraceRef.current) {
-        clearTimeout(timeoutGraceRef.current)
+  /**
+   * Manually trigger initialization (for lazy loading)
+   */
+  const initialize = useCallback(() => {
+    if (state.status === 'idle') {
+      initializeWorker()
+    }
+  }, [state.status, initializeWorker])
+
+  /**
+   * Run Python code
+   */
+  const runCode = useCallback(async (code: string): Promise<RunResult> => {
+    // Auto-initialize if not started
+    if (statusRef.current === 'idle') {
+      initializeWorker()
+      // Wait a bit for initialization to start
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+
+    if (statusRef.current !== 'ready') {
+      const message = statusRef.current === 'error'
+        ? 'Python encountered an error. Try refreshing the page.'
+        : statusRef.current === 'loading'
+        ? 'Python is loading, please wait...'
+        : 'Python is not ready yet.'
+      return { success: false, stdout: '', stderr: message }
+    }
+
+    try {
+      const sendMessage = sendMessageRef.current
+      if (!sendMessage) {
+        return { success: false, stdout: '', stderr: 'Python runtime not initialized' }
       }
-
-      // Reject all pending promises before termination
-      clearPendingPromises('Worker terminated')
-
-      if (workerRef.current) {
-        workerRef.current.terminate()
-        workerRef.current = null
+      return await sendMessage<RunResult>('run', { code, timeout: EXECUTION_TIMEOUT_MS })
+    } catch (error) {
+      return {
+        success: false,
+        stdout: '',
+        stderr: error instanceof Error ? error.message : String(error),
       }
     }
-  }, [initializeWorker, clearPendingPromises])
+  }, [initializeWorker])
 
-  // Stable sendMessage wrapper
-  const sendMessage = useCallback(
-    <T,>(type: string, payload: Record<string, unknown>): Promise<T> => {
-      if (!sendMessageRef.current) {
-        return Promise.reject(new Error('Not initialized'))
-      }
-      return sendMessageRef.current(type, payload)
-    },
-    []
-  )
+  /**
+   * Validate code with assertion
+   */
+  const validateCode = useCallback(async (userCode: string, validateCodeStr: string): Promise<ValidationResult> => {
+    if (statusRef.current === 'idle') {
+      initializeWorker()
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
 
-  // Run Python code
-  const runCode = useCallback(
-    async (code: string): Promise<RunResult> => {
-      // Use ref to avoid stale closure
-      const currentStatus = statusRef.current
-
-      if (currentStatus !== 'ready') {
-        const message = currentStatus === 'error'
+    if (statusRef.current !== 'ready') {
+      return {
+        passed: false,
+        message: statusRef.current === 'error'
           ? 'Python encountered an error. Try refreshing the page.'
-          : 'Python is not ready yet. Please wait...'
-        return {
-          success: false,
-          stdout: '',
-          stderr: message,
-        }
+          : 'Python is not ready yet',
+        stdout: '',
       }
+    }
 
-      try {
-        return await sendMessage<RunResult>('run', { code, timeout: EXECUTION_TIMEOUT_MS })
-      } catch (error) {
-        return {
-          success: false,
-          stdout: '',
-          stderr: error instanceof Error ? error.message : String(error),
-        }
+    try {
+      const sendMessage = sendMessageRef.current
+      if (!sendMessage) {
+        return { passed: false, message: 'Python runtime not initialized', stdout: '' }
       }
-    },
-    [sendMessage]
-  )
-
-  // Validate code with assertion
-  const validateCode = useCallback(
-    async (userCode: string, validateCodeStr: string): Promise<ValidationResult> => {
-      const currentStatus = statusRef.current
-
-      if (currentStatus !== 'ready') {
-        return {
-          passed: false,
-          message: currentStatus === 'error'
-            ? 'Python encountered an error. Try refreshing the page.'
-            : 'Python is not ready yet',
-          stdout: '',
-        }
+      return await sendMessage<ValidationResult>('validate', {
+        userCode,
+        validateCode: validateCodeStr,
+        timeout: EXECUTION_TIMEOUT_MS,
+      })
+    } catch (error) {
+      return {
+        passed: false,
+        message: error instanceof Error ? error.message : String(error),
+        stdout: '',
       }
+    }
+  }, [initializeWorker])
 
-      try {
-        return await sendMessage<ValidationResult>('validate', {
-          userCode,
-          validateCode: validateCodeStr,
-          timeout: EXECUTION_TIMEOUT_MS,
-        })
-      } catch (error) {
-        return {
-          passed: false,
-          message: error instanceof Error ? error.message : String(error),
-          stdout: '',
-        }
+  /**
+   * Check expected output
+   */
+  const checkExpected = useCallback(async (userCode: string, expected: string): Promise<ValidationResult> => {
+    const result = await runCode(userCode)
+
+    if (!result.success) {
+      return { passed: false, message: result.stderr, stdout: result.stdout }
+    }
+
+    const actualOutput = result.stdout.trim()
+    const expectedOutput = expected.trim()
+
+    if (actualOutput === expectedOutput) {
+      return { passed: true, message: 'Correct!', stdout: result.stdout }
+    } else {
+      return {
+        passed: false,
+        message: `Expected output: "${expectedOutput}"\nActual output: "${actualOutput}"`,
+        stdout: result.stdout,
       }
-    },
-    [sendMessage]
-  )
+    }
+  }, [runCode])
 
-  // Check expected output
-  const checkExpected = useCallback(
-    async (userCode: string, expected: string): Promise<ValidationResult> => {
-      const result = await runCode(userCode)
+  /**
+   * Load additional packages
+   */
+  const loadPackages = useCallback(async (packages: string[]): Promise<void> => {
+    if (statusRef.current !== 'ready') {
+      throw new Error('Python is not ready yet')
+    }
 
-      if (!result.success) {
-        return {
-          passed: false,
-          message: result.stderr,
-          stdout: result.stdout,
-        }
+    setState(s => ({ ...s, loadingProgress: `Loading ${packages.join(', ')}...` }))
+
+    try {
+      const sendMessage = sendMessageRef.current
+      if (!sendMessage) {
+        throw new Error('Python runtime not initialized')
       }
+      await sendMessage('loadPackages', { packages })
+    } finally {
+      setState(s => ({ ...s, loadingProgress: '' }))
+    }
+  }, [])
 
-      const actualOutput = result.stdout.trim()
-      const expectedOutput = expected.trim()
-
-      if (actualOutput === expectedOutput) {
-        return {
-          passed: true,
-          message: 'Correct!',
-          stdout: result.stdout,
-        }
-      } else {
-        return {
-          passed: false,
-          message: `Expected output: "${expectedOutput}"\nActual output: "${actualOutput}"`,
-          stdout: result.stdout,
-        }
-      }
-    },
-    [runCode]
-  )
-
-  // Load packages
-  const loadPackages = useCallback(
-    async (packages: string[]): Promise<void> => {
-      const currentStatus = statusRef.current
-
-      if (currentStatus !== 'ready') {
-        throw new Error('Python is not ready yet')
-      }
-
-      setState((s) => ({
-        ...s,
-        loadingProgress: `Loading ${packages.join(', ')}...`,
-      }))
-
-      try {
-        await sendMessage('loadPackages', { packages })
-      } finally {
-        setState((s) => ({ ...s, loadingProgress: '' }))
-      }
-    },
-    [sendMessage]
-  )
-
-  // Manual restart
+  /**
+   * Restart the worker
+   */
   const restartWorker = useCallback(() => {
-    terminateAndRestart()
+    initializationStartedRef.current = false
+    terminateWorker()
+    setState({ status: 'loading', error: null, loadingProgress: 'Restarting Python...' })
     initializeWorker()
-  }, [terminateAndRestart, initializeWorker])
+  }, [terminateWorker, initializeWorker])
 
-  const value: PyodideContextValue = {
-    state,
-    runCode,
-    validateCode,
-    checkExpected,
-    loadPackages,
-    restartWorker,
-  }
+  // =============================================================================
+  // Lifecycle
+  // =============================================================================
+
+  // Eager initialization if requested
+  useEffect(() => {
+    if (eager) {
+      initializeWorker()
+    }
+
+    return () => {
+      terminateWorker()
+    }
+  }, [eager, initializeWorker, terminateWorker])
+
+  // =============================================================================
+  // Render
+  // =============================================================================
+
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(
+    () => ({
+      state,
+      initialize,
+      runCode,
+      validateCode,
+      checkExpected,
+      loadPackages,
+      restartWorker,
+    }),
+    [state, initialize, runCode, validateCode, checkExpected, loadPackages, restartWorker]
+  )
 
   return (
-    <PyodideContext.Provider value={value}>{children}</PyodideContext.Provider>
+    <PyodideContext.Provider value={value}>
+      {children}
+    </PyodideContext.Provider>
   )
 }

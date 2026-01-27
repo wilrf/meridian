@@ -130,7 +130,14 @@ const markdownComponents: Components = {
     const hintsJson = (nodeProps['data-hints'] ?? nodeProps['dataHints']) as
       | string
       | undefined
-    const hints: string[] = hintsJson ? JSON.parse(hintsJson) : []
+    let hints: string[] = []
+    if (hintsJson) {
+      try {
+        hints = JSON.parse(hintsJson)
+      } catch (e) {
+        console.warn('Failed to parse hints JSON:', e)
+      }
+    }
 
     if (dataCodeBlock === 'true') {
       // Extract text content from the code element

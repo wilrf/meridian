@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { User, Session } from '@supabase/supabase-js'
 
@@ -22,12 +22,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = createClient()
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    // Get initial user (getUser validates with server, getSession only reads local storage)
+    supabase.auth.getUser()
+      .then(({ data: { user }, error }) => {
+        if (error) {
+          console.error('Error getting user:', error)
+          setUser(null)
+          setSession(null)
+        } else {
+          setUser(user)
+          // Also get session for token access
+          return supabase.auth.getSession()
+        }
+      })
+      .then((result) => {
+        if (result) {
+          setSession(result.data.session)
+        }
+      })
+      .catch((error) => {
+        console.error('Error initializing auth:', error)
+        setUser(null)
+        setSession(null)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
 
     // Listen for auth changes
     const {
@@ -64,16 +84,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(
+    () => ({
+      user,
+      session,
+      loading,
+      signInWithGithub,
+      signOut,
+    }),
+    [user, session, loading, signInWithGithub, signOut]
+  )
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        session,
-        loading,
-        signInWithGithub,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )

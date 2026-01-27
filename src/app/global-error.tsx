@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 export default function GlobalError({
   error,
   reset,
@@ -7,6 +9,14 @@ export default function GlobalError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    // Log the error to console for debugging
+    console.error('Global error:', error)
+
+    // In production, you might want to send this to an error tracking service
+    // Example: Sentry.captureException(error)
+  }, [error])
+
   return (
     <html lang="en">
       <body>

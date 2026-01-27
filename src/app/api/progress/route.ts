@@ -33,8 +33,33 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Valid actions for type safety
+const VALID_ACTIONS = ['completeExercise', 'completeLesson', 'updateLesson'] as const
+type ValidAction = typeof VALID_ACTIONS[number]
+
+// Maximum request body size (10KB)
+const MAX_BODY_SIZE = 10000
+
 // POST /api/progress - Update progress
 export async function POST(request: NextRequest) {
+  // Check Content-Type header
+  const contentType = request.headers.get('content-type')
+  if (!contentType?.includes('application/json')) {
+    return NextResponse.json(
+      { error: 'Content-Type must be application/json' },
+      { status: 415 }
+    )
+  }
+
+  // Check Content-Length to prevent oversized payloads
+  const contentLength = request.headers.get('content-length')
+  if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
+    return NextResponse.json(
+      { error: 'Request body too large' },
+      { status: 413 }
+    )
+  }
+
   // Parse JSON with explicit error handling
   let body: unknown
   try {
@@ -55,11 +80,18 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { action, lessonId, exerciseId, progress: lessonProgressUpdate } = body as {
-      action: 'completeExercise' | 'completeLesson' | 'updateLesson'
-      lessonId?: string
-      exerciseId?: string
-      progress?: Partial<LessonProgress>
+    const bodyObj = body as Record<string, unknown>
+    const action = bodyObj.action as string | undefined
+    const lessonId = bodyObj.lessonId as string | undefined
+    const exerciseId = bodyObj.exerciseId as string | undefined
+    const lessonProgressUpdate = bodyObj.progress as Partial<LessonProgress> | undefined
+
+    // Validate action is one of the allowed values
+    if (!action || !VALID_ACTIONS.includes(action as ValidAction)) {
+      return NextResponse.json(
+        { error: 'Invalid or missing action' },
+        { status: 400 }
+      )
     }
 
     if (!lessonId) {

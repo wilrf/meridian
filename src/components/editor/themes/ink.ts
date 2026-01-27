@@ -1,137 +1,269 @@
 import type { editor } from 'monaco-editor'
 
 /**
- * LearnPython "Ink" Theme
- *
- * A sophisticated dark theme with plum-black backgrounds and warm,
- * muted syntax colors. Matches the "Velvet" dark mode palette.
+ * Meridian "Ink" Theme
+ * 
+ * A sophisticated dark theme with deep plum-black backgrounds and warm,
+ * muted syntax colors. Designed for extended coding sessions with
+ * reduced eye strain while maintaining excellent readability.
+ * 
+ * Color Philosophy:
+ * - Background: Deep plum-black (#0A0910) for depth
+ * - Text: Warm off-white (#E0DDD6) for comfort
+ * - Accents: Muted, warm tones that don't compete for attention
+ * - Highlights: Subtle purple undertones for cohesion
+ */
+
+// Theme identifier
+export const inkThemeName = 'meridian-ink'
+
+// Color palette - matches CSS variables in globals.css
+const colors = {
+  // Backgrounds
+  bg: '#0A0910',
+  bgHighlight: '#13111A',
+  bgSelection: '#2D2640',
+  bgSelectionInactive: '#2D264080',
+  bgSelectionHighlight: '#2D264040',
+  
+  // Text
+  text: '#E0DDD6',
+  textMuted: '#6E6880',
+  textSubtle: '#A9A3B3',
+  
+  // Syntax - warm, muted palette
+  keyword: '#C9A0DC',      // Soft lavender
+  string: '#A8C4A0',       // Muted sage
+  number: '#D4B896',       // Soft gold
+  function: '#93B5CF',     // Dusty blue
+  comment: '#6E6880',      // Muted purple-gray
+  operator: '#B8A8C8',     // Light purple
+  decorator: '#B8A07E',    // Quiet gold
+  class: '#D4B896',        // Soft gold
+  constant: '#C9A0DC',     // Soft lavender
+  parameter: '#C4B8A0',    // Warm beige
+  punctuation: '#A9A3B3',  // Subtle gray
+  
+  // UI elements
+  cursor: '#D4C5A9',       // Champagne
+  lineNumber: '#6E6880',
+  lineNumberActive: '#A9A3B3',
+  indentGuide: '#1A1724',
+  indentGuideActive: '#2A2533',
+  whitespace: '#2A2533',
+  bracketMatch: '#D4C5A9',
+  
+  // Scrollbar
+  scrollbar: '#3D364980',
+  scrollbarHover: '#56506B80',
+  scrollbarActive: '#56506B',
+} as const
+
+/**
+ * Monaco theme definition
  */
 export const inkTheme: editor.IStandaloneThemeData = {
   base: 'vs-dark',
   inherit: false,
   rules: [
-    // Base
-    { token: '', foreground: 'E0DDD6', background: '0A0910' },
-
-    // Comments - muted purple-gray, italic
-    { token: 'comment', foreground: '6E6880', fontStyle: 'italic' },
-    { token: 'comment.line', foreground: '6E6880', fontStyle: 'italic' },
-    { token: 'comment.block', foreground: '6E6880', fontStyle: 'italic' },
-
-    // Keywords - soft lavender
-    { token: 'keyword', foreground: 'C9A0DC' },
-    { token: 'keyword.control', foreground: 'C9A0DC' },
-    { token: 'keyword.operator', foreground: 'B8A8C8' },
-
-    // Strings - muted sage
-    { token: 'string', foreground: 'A8C4A0' },
-    { token: 'string.quoted', foreground: 'A8C4A0' },
-    { token: 'string.quoted.single', foreground: 'A8C4A0' },
-    { token: 'string.quoted.double', foreground: 'A8C4A0' },
-    { token: 'string.template', foreground: 'A8C4A0' },
-
-    // Numbers - soft gold
-    { token: 'number', foreground: 'D4B896' },
-    { token: 'number.float', foreground: 'D4B896' },
-    { token: 'number.hex', foreground: 'D4B896' },
-
-    // Functions - dusty blue
-    { token: 'function', foreground: '93B5CF' },
-    { token: 'function.call', foreground: '93B5CF' },
-    { token: 'entity.name.function', foreground: '93B5CF' },
-    { token: 'support.function', foreground: '93B5CF' },
-
-    // Classes & Types - soft gold
-    { token: 'class', foreground: 'D4B896' },
-    { token: 'type', foreground: 'D4B896' },
-    { token: 'entity.name.class', foreground: 'D4B896' },
-    { token: 'entity.name.type', foreground: 'D4B896' },
-
+    // Base text
+    { token: '', foreground: colors.text.slice(1), background: colors.bg.slice(1) },
+    
+    // Comments - italic for distinction
+    { token: 'comment', foreground: colors.comment.slice(1), fontStyle: 'italic' },
+    { token: 'comment.line', foreground: colors.comment.slice(1), fontStyle: 'italic' },
+    { token: 'comment.block', foreground: colors.comment.slice(1), fontStyle: 'italic' },
+    { token: 'comment.documentation', foreground: colors.comment.slice(1), fontStyle: 'italic' },
+    
+    // Keywords - control flow, declarations
+    { token: 'keyword', foreground: colors.keyword.slice(1) },
+    { token: 'keyword.control', foreground: colors.keyword.slice(1) },
+    { token: 'keyword.control.flow', foreground: colors.keyword.slice(1) },
+    { token: 'keyword.operator', foreground: colors.operator.slice(1) },
+    { token: 'keyword.other', foreground: colors.keyword.slice(1) },
+    
+    // Storage types (def, class, etc.)
+    { token: 'storage', foreground: colors.keyword.slice(1) },
+    { token: 'storage.type', foreground: colors.keyword.slice(1) },
+    { token: 'storage.modifier', foreground: colors.keyword.slice(1) },
+    
+    // Strings - all variations
+    { token: 'string', foreground: colors.string.slice(1) },
+    { token: 'string.quoted', foreground: colors.string.slice(1) },
+    { token: 'string.quoted.single', foreground: colors.string.slice(1) },
+    { token: 'string.quoted.double', foreground: colors.string.slice(1) },
+    { token: 'string.quoted.triple', foreground: colors.string.slice(1) },
+    { token: 'string.template', foreground: colors.string.slice(1) },
+    { token: 'string.regexp', foreground: colors.string.slice(1) },
+    
+    // Numbers
+    { token: 'number', foreground: colors.number.slice(1) },
+    { token: 'number.float', foreground: colors.number.slice(1) },
+    { token: 'number.hex', foreground: colors.number.slice(1) },
+    { token: 'number.octal', foreground: colors.number.slice(1) },
+    { token: 'number.binary', foreground: colors.number.slice(1) },
+    { token: 'constant.numeric', foreground: colors.number.slice(1) },
+    
+    // Functions
+    { token: 'function', foreground: colors.function.slice(1) },
+    { token: 'function.call', foreground: colors.function.slice(1) },
+    { token: 'entity.name.function', foreground: colors.function.slice(1) },
+    { token: 'support.function', foreground: colors.function.slice(1) },
+    { token: 'support.function.builtin', foreground: colors.function.slice(1) },
+    { token: 'meta.function-call', foreground: colors.function.slice(1) },
+    
+    // Classes and types
+    { token: 'class', foreground: colors.class.slice(1) },
+    { token: 'type', foreground: colors.class.slice(1) },
+    { token: 'entity.name.class', foreground: colors.class.slice(1) },
+    { token: 'entity.name.type', foreground: colors.class.slice(1) },
+    { token: 'support.class', foreground: colors.class.slice(1) },
+    { token: 'support.type', foreground: colors.class.slice(1) },
+    
     // Variables
-    { token: 'variable', foreground: 'E0DDD6' },
-    { token: 'variable.parameter', foreground: 'C4B8A0' },
-    { token: 'variable.other', foreground: 'E0DDD6' },
-
-    // Operators - muted purple
-    { token: 'operator', foreground: 'B8A8C8' },
-
-    // Constants - lavender
-    { token: 'constant', foreground: 'C9A0DC' },
-    { token: 'constant.language', foreground: 'C9A0DC' },
-    { token: 'constant.language.boolean', foreground: 'C9A0DC' },
-    { token: 'constant.language.null', foreground: 'C9A0DC' },
-
-    // Built-ins - dusty blue
-    { token: 'support.function.builtin', foreground: '93B5CF' },
-    { token: 'builtin', foreground: '93B5CF' },
-
-    // Decorators - quiet gold
-    { token: 'decorator', foreground: 'B8A07E' },
-    { token: 'meta.decorator', foreground: 'B8A07E' },
-    { token: 'tag.decorator', foreground: 'B8A07E' },
-
+    { token: 'variable', foreground: colors.text.slice(1) },
+    { token: 'variable.parameter', foreground: colors.parameter.slice(1) },
+    { token: 'variable.other', foreground: colors.text.slice(1) },
+    { token: 'variable.language', foreground: colors.constant.slice(1) },
+    
+    // Operators
+    { token: 'operator', foreground: colors.operator.slice(1) },
+    { token: 'keyword.operator', foreground: colors.operator.slice(1) },
+    
+    // Constants
+    { token: 'constant', foreground: colors.constant.slice(1) },
+    { token: 'constant.language', foreground: colors.constant.slice(1) },
+    { token: 'constant.language.boolean', foreground: colors.constant.slice(1) },
+    { token: 'constant.language.null', foreground: colors.constant.slice(1) },
+    { token: 'constant.other', foreground: colors.constant.slice(1) },
+    
+    // Built-ins
+    { token: 'builtin', foreground: colors.function.slice(1) },
+    { token: 'support.variable', foreground: colors.function.slice(1) },
+    
+    // Decorators
+    { token: 'decorator', foreground: colors.decorator.slice(1) },
+    { token: 'meta.decorator', foreground: colors.decorator.slice(1) },
+    { token: 'tag.decorator', foreground: colors.decorator.slice(1) },
+    { token: 'punctuation.decorator', foreground: colors.decorator.slice(1) },
+    
     // Punctuation
-    { token: 'punctuation', foreground: 'A9A3B3' },
-    { token: 'bracket', foreground: 'A9A3B3' },
-    { token: 'delimiter', foreground: 'A9A3B3' },
-
-    // Python specific
-    { token: 'keyword.control.flow.python', foreground: 'C9A0DC' },
-    { token: 'constant.language.python', foreground: 'C9A0DC' },
-    { token: 'storage.type.function.python', foreground: 'C9A0DC' },
-    { token: 'storage.type.class.python', foreground: 'C9A0DC' },
+    { token: 'punctuation', foreground: colors.punctuation.slice(1) },
+    { token: 'bracket', foreground: colors.punctuation.slice(1) },
+    { token: 'delimiter', foreground: colors.punctuation.slice(1) },
+    { token: 'delimiter.bracket', foreground: colors.punctuation.slice(1) },
+    { token: 'delimiter.parenthesis', foreground: colors.punctuation.slice(1) },
+    { token: 'delimiter.square', foreground: colors.punctuation.slice(1) },
+    { token: 'delimiter.curly', foreground: colors.punctuation.slice(1) },
+    
+    // Python specific tokens
+    { token: 'keyword.control.flow.python', foreground: colors.keyword.slice(1) },
+    { token: 'constant.language.python', foreground: colors.constant.slice(1) },
+    { token: 'storage.type.function.python', foreground: colors.keyword.slice(1) },
+    { token: 'storage.type.class.python', foreground: colors.keyword.slice(1) },
+    { token: 'meta.function.python', foreground: colors.function.slice(1) },
+    { token: 'entity.name.function.python', foreground: colors.function.slice(1) },
+    
+    // Special
+    { token: 'invalid', foreground: 'D98B8B' },
+    { token: 'invalid.illegal', foreground: 'D98B8B' },
   ],
   colors: {
     // Editor chrome
-    'editor.background': '#0A0910',
-    'editor.foreground': '#E0DDD6',
-
+    'editor.background': colors.bg,
+    'editor.foreground': colors.text,
+    
     // Line highlighting
-    'editor.lineHighlightBackground': '#13111A',
-    'editor.lineHighlightBorder': '#13111A',
-
+    'editor.lineHighlightBackground': colors.bgHighlight,
+    'editor.lineHighlightBorder': '#00000000',
+    
     // Selection
-    'editor.selectionBackground': '#2D2640',
-    'editor.inactiveSelectionBackground': '#2D264080',
-    'editor.selectionHighlightBackground': '#2D264040',
-
+    'editor.selectionBackground': colors.bgSelection,
+    'editor.inactiveSelectionBackground': colors.bgSelectionInactive,
+    'editor.selectionHighlightBackground': colors.bgSelectionHighlight,
+    
+    // Word highlight
+    'editor.wordHighlightBackground': colors.bgSelectionHighlight,
+    'editor.wordHighlightStrongBackground': colors.bgSelection,
+    
+    // Find matches
+    'editor.findMatchBackground': colors.bgSelection,
+    'editor.findMatchHighlightBackground': colors.bgSelectionHighlight,
+    'editor.findMatchBorder': colors.cursor,
+    
     // Line numbers
-    'editorLineNumber.foreground': '#6E6880',
-    'editorLineNumber.activeForeground': '#A9A3B3',
-
+    'editorLineNumber.foreground': colors.lineNumber,
+    'editorLineNumber.activeForeground': colors.lineNumberActive,
+    
     // Cursor
-    'editorCursor.foreground': '#D4C5A9',
-
+    'editorCursor.foreground': colors.cursor,
+    'editorCursor.background': colors.bg,
+    
     // Indent guides
-    'editorIndentGuide.background': '#1A1724',
-    'editorIndentGuide.activeBackground': '#2A2533',
-
+    'editorIndentGuide.background': colors.indentGuide,
+    'editorIndentGuide.activeBackground': colors.indentGuideActive,
+    
     // Whitespace
-    'editorWhitespace.foreground': '#2A2533',
-
+    'editorWhitespace.foreground': colors.whitespace,
+    
     // Bracket matching
-    'editorBracketMatch.background': '#2D264060',
-    'editorBracketMatch.border': '#D4C5A9',
-
+    'editorBracketMatch.background': `${colors.bgSelection}60`,
+    'editorBracketMatch.border': colors.bracketMatch,
+    
+    // Bracket pair colorization
+    'editorBracketHighlight.foreground1': colors.punctuation,
+    'editorBracketHighlight.foreground2': colors.function,
+    'editorBracketHighlight.foreground3': colors.keyword,
+    
     // Gutter
-    'editorGutter.background': '#0A0910',
-
+    'editorGutter.background': colors.bg,
+    'editorGutter.addedBackground': '#8BB396',
+    'editorGutter.modifiedBackground': '#D4B896',
+    'editorGutter.deletedBackground': '#D98B8B',
+    
     // Scrollbar
     'scrollbar.shadow': '#00000000',
-    'scrollbarSlider.background': '#3D364980',
-    'scrollbarSlider.hoverBackground': '#56506B80',
-    'scrollbarSlider.activeBackground': '#56506B',
-
-    // Find/Replace
-    'editor.findMatchBackground': '#2D264080',
-    'editor.findMatchHighlightBackground': '#2D264040',
-
+    'scrollbarSlider.background': colors.scrollbar,
+    'scrollbarSlider.hoverBackground': colors.scrollbarHover,
+    'scrollbarSlider.activeBackground': colors.scrollbarActive,
+    
     // Overview ruler
     'editorOverviewRuler.border': '#00000000',
-
-    // Minimap (disabled but just in case)
-    'minimap.background': '#0A0910',
+    'editorOverviewRuler.background': colors.bg,
+    
+    // Widgets
+    'editorWidget.background': colors.bgHighlight,
+    'editorWidget.border': colors.indentGuide,
+    'editorWidget.foreground': colors.text,
+    
+    // Suggest widget (autocomplete)
+    'editorSuggestWidget.background': colors.bgHighlight,
+    'editorSuggestWidget.border': colors.indentGuide,
+    'editorSuggestWidget.foreground': colors.text,
+    'editorSuggestWidget.selectedBackground': colors.bgSelection,
+    'editorSuggestWidget.highlightForeground': colors.cursor,
+    
+    // Hover widget
+    'editorHoverWidget.background': colors.bgHighlight,
+    'editorHoverWidget.border': colors.indentGuide,
+    'editorHoverWidget.foreground': colors.text,
+    
+    // Error/Warning
+    'editorError.foreground': '#D98B8B',
+    'editorWarning.foreground': '#D4B896',
+    'editorInfo.foreground': '#93B5CF',
+    
+    // Input (find/replace)
+    'input.background': colors.bg,
+    'input.border': colors.indentGuide,
+    'input.foreground': colors.text,
+    'input.placeholderForeground': colors.textMuted,
+    'inputOption.activeBackground': colors.bgSelection,
+    'inputOption.activeBorder': colors.cursor,
+    
+    // Focus border
+    'focusBorder': colors.cursor,
   },
 }
 
-export const inkThemeName = 'learnpython-ink'
+export default inkTheme

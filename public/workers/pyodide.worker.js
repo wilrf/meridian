@@ -1,8 +1,8 @@
 // Pyodide Web Worker
 // Runs Python code in a separate thread to avoid blocking the UI
 
-// Version should match package.json dependency
-const PYODIDE_VERSION = '0.27.0'
+// Version should match package.json dependency (pyodide@^0.29.2)
+const PYODIDE_VERSION = '0.29.2'
 const PYODIDE_CDN = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`
 
 // Limits

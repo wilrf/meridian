@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, type ReactNode } from 'react'
+import { createContext, useContext, useMemo, type ReactNode } from 'react'
 
 interface LessonContextValue {
   lessonId: string | null
@@ -18,8 +18,11 @@ interface LessonProviderProps {
 }
 
 export function LessonProvider({ lessonId, children }: LessonProviderProps) {
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({ lessonId }), [lessonId])
+
   return (
-    <LessonContext.Provider value={{ lessonId }}>
+    <LessonContext.Provider value={value}>
       {children}
     </LessonContext.Provider>
   )

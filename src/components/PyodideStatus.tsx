@@ -5,7 +5,9 @@ import { usePyodide } from '@/lib/pyodide-context'
 export default function PyodideStatus() {
   const { state } = usePyodide()
 
-  if (state.status === 'ready') {
+  // Only show status when actively loading or there's an error
+  // Don't show anything for 'idle' (before user runs code) or 'ready'
+  if (state.status === 'ready' || state.status === 'idle') {
     return null
   }
 

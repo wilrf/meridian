@@ -221,6 +221,10 @@ export async function completeExercise(
   if (!exerciseId || typeof exerciseId !== 'string' || exerciseId.length > 100) {
     throw new Error(`Invalid exercise ID: ${exerciseId}`)
   }
+  // Check for prototype pollution
+  if (FORBIDDEN_KEYS.has(exerciseId)) {
+    throw new Error(`Invalid exercise ID: ${exerciseId}`)
+  }
 
   const progress = readProgress()
   const lesson = progress.lessons[lessonId] ?? {

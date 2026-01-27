@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useMemo,
   type ReactNode,
 } from 'react'
 
@@ -91,13 +92,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setThemeState((current) => current === 'light' ? 'dark' : 'light')
   }, [])
 
-  // Always provide the context, even during SSR
-  // This prevents the "useTheme must be used within a ThemeProvider" error
-  const value: ThemeContextValue = {
-    theme,
-    setTheme,
-    toggleTheme,
-  }
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(
+    () => ({
+      theme,
+      setTheme,
+      toggleTheme,
+    }),
+    [theme, setTheme, toggleTheme]
+  )
 
   return (
     <ThemeContext.Provider value={value}>

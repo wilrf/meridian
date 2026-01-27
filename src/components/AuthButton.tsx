@@ -1,12 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '@/lib/auth-context'
 
 export default function AuthButton() {
   const { user, loading, signInWithGithub, signOut } = useAuth()
   const [isSigningIn, setIsSigningIn] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  // Close dropdown on Escape key
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && showDropdown) {
+      setShowDropdown(false)
+      buttonRef.current?.focus()
+    }
+  }, [showDropdown])
+
+  useEffect(() => {
+    if (showDropdown) {
+      document.addEventListener('keydown', handleKeyDown)
+      return () => document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showDropdown, handleKeyDown])
 
   const handleSignIn = async () => {
     setIsSigningIn(true)
@@ -21,7 +38,11 @@ export default function AuthButton() {
 
   const handleSignOut = async () => {
     setShowDropdown(false)
-    await signOut()
+    try {
+      await signOut()
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
   }
 
   if (loading) {
@@ -40,9 +61,13 @@ export default function AuthButton() {
                  'User'
 
     return (
-      <div className="relative">
+      <div className="relative" ref={dropdownRef}>
         <button
+          ref={buttonRef}
           onClick={() => setShowDropdown(!showDropdown)}
+          aria-expanded={showDropdown}
+          aria-haspopup="menu"
+          aria-label={`User menu for ${name}`}
           className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--bg-subtle)] transition-colors w-full"
         >
           {avatarUrl ? (
@@ -77,13 +102,20 @@ export default function AuthButton() {
             <div
               className="fixed inset-0 z-10"
               onClick={() => setShowDropdown(false)}
+              aria-hidden="true"
             />
-            <div className="absolute bottom-full left-0 right-0 mb-1 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg shadow-lg z-20 overflow-hidden">
+            <div
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="user-menu-button"
+              className="absolute bottom-full left-0 right-0 mb-1 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg shadow-lg z-20 overflow-hidden"
+            >
               <div className="px-3 py-2 border-b border-[var(--border-subtle)]">
                 <p className="text-xs text-[var(--text-muted)]">Signed in as</p>
                 <p className="text-sm text-[var(--text-primary)] truncate">{user.email}</p>
               </div>
               <button
+                role="menuitem"
                 onClick={handleSignOut}
                 className="w-full px-3 py-2 text-sm text-left text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)] transition-colors"
               >

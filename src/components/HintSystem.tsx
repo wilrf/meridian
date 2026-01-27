@@ -32,7 +32,7 @@ export default function HintSystem({ hints, exerciseId: _exerciseId }: HintSyste
         {/* Hint toggle button */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full px-5 py-3 flex items-center justify-between text-sm
+          className="btn-lift w-full px-5 py-3 flex items-center justify-between text-sm
             text-warning hover:text-warning-strong
             hover:bg-white/5 transition-all duration-200"
         >
@@ -57,7 +57,7 @@ export default function HintSystem({ hints, exerciseId: _exerciseId }: HintSyste
             </span>
           </span>
           <svg
-            className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+            className={`w-4 h-4 transition-transform duration-300 ease-[var(--ease-out-expo)] ${isExpanded ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -71,53 +71,57 @@ export default function HintSystem({ hints, exerciseId: _exerciseId }: HintSyste
           </svg>
         </button>
 
-        {/* Hints content */}
-        {isExpanded && (
-          <div className="px-5 pb-4 animate-slide-down">
-            {revealedHints.length > 0 ? (
-              <div className="space-y-2 mb-4">
-                {revealedHints.map((hint, index) => (
-                  <div
-                    key={index}
-                    className="bg-white/5 backdrop-blur-sm rounded-xl p-4
-                      border border-warning/20 text-sm text-[var(--text-secondary)]"
-                  >
-                    <span className="font-medium text-warning">
-                      Hint {index + 1}:
-                    </span>{' '}
-                    <span className="text-[var(--output-text)]/80">{hint}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-warning/80 mb-4">
-                Stuck? Click below to reveal a hint.
-              </p>
-            )}
+        {/* Hints content with CSS grid animation */}
+        <div className={`hints-grid ${isExpanded ? 'expanded' : 'collapsed'}`}>
+          <div className="hints-content">
+            <div className="px-5 pb-4">
+              {revealedHints.length > 0 ? (
+                <div className="space-y-2 mb-4">
+                  {revealedHints.map((hint, index) => (
+                    <div
+                      key={index}
+                      className="bg-white/5 backdrop-blur-sm rounded-xl p-4
+                        border border-warning/20 text-sm text-[var(--text-secondary)]
+                        animate-slide-up"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <span className="font-medium text-warning">
+                        Hint {index + 1}:
+                      </span>{' '}
+                      <span className="text-[var(--output-text)]/80">{hint}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-warning/80 mb-4">
+                  Stuck? Click below to reveal a hint.
+                </p>
+              )}
 
-            {hasMoreHints && (
-              <button
-                onClick={handleRevealHint}
-                className="px-4 py-2 rounded-xl text-sm font-medium
-                  bg-warning/80 hover:bg-warning-strong text-white
-                  backdrop-blur-sm border border-warning/30
-                  shadow-lg shadow-[var(--warning-base)]/20 hover:shadow-[var(--warning-base)]/30
-                  transition-all duration-300
-                  hover:scale-[1.02] active:scale-[0.98]"
-              >
-                {revealedCount === 0
-                  ? 'Show Hint'
-                  : `Show Next Hint (${hints.length - revealedCount} left)`}
-              </button>
-            )}
+              {hasMoreHints && (
+                <button
+                  onClick={handleRevealHint}
+                  className="btn-lift px-4 py-2 rounded-xl text-sm font-medium
+                    bg-warning/80 hover:bg-warning-strong text-white
+                    backdrop-blur-sm border border-warning/30
+                    shadow-lg shadow-[var(--warning-base)]/20 hover:shadow-[var(--warning-base)]/30
+                    transition-all duration-300
+                    active:scale-[0.97]"
+                >
+                  {revealedCount === 0
+                    ? 'Show Hint'
+                    : `Show Next Hint (${hints.length - revealedCount} left)`}
+                </button>
+              )}
 
-            {!hasMoreHints && revealedCount > 0 && (
-              <p className="text-xs text-warning/60">
-                No more hints available. Try your best!
-              </p>
-            )}
+              {!hasMoreHints && revealedCount > 0 && (
+                <p className="text-xs text-warning/60">
+                  No more hints available. Try your best!
+                </p>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

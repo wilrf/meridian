@@ -8,6 +8,25 @@ const DEFAULT_PROGRESS: ProgressData = {
 }
 
 /**
+ * Type guard to validate ProgressData structure from database
+ */
+function isValidProgressData(data: unknown): data is ProgressData {
+  if (!data || typeof data !== 'object') return false
+  const obj = data as Record<string, unknown>
+
+  // lastUpdated must be string or null
+  if (obj.lastUpdated !== null && typeof obj.lastUpdated !== 'string') return false
+
+  // lessons must be object
+  if (typeof obj.lessons !== 'object' || obj.lessons === null) return false
+
+  // projects must be object
+  if (typeof obj.projects !== 'object' || obj.projects === null) return false
+
+  return true
+}
+
+/**
  * Fetch progress from Supabase for the current user
  */
 export async function fetchCloudProgress(): Promise<ProgressData | null> {
@@ -31,7 +50,13 @@ export async function fetchCloudProgress(): Promise<ProgressData | null> {
     return null
   }
 
-  return data.progress_data as ProgressData
+  // Validate the data structure before returning
+  if (!isValidProgressData(data.progress_data)) {
+    console.error('Invalid progress data structure from database')
+    return DEFAULT_PROGRESS
+  }
+
+  return data.progress_data
 }
 
 /**
@@ -148,14 +173,19 @@ export function mergeProgress(
   return merged
 }
 
+function isValidDate(dateStr: string): boolean {
+  const date = new Date(dateStr)
+  return !isNaN(date.getTime())
+}
+
 function getEarlierDate(a?: string, b?: string): string | undefined {
-  if (!a) return b
-  if (!b) return a
+  if (!a || !isValidDate(a)) return b
+  if (!b || !isValidDate(b)) return a
   return new Date(a) < new Date(b) ? a : b
 }
 
 function getLaterDate(a?: string, b?: string): string | undefined {
-  if (!a) return b
-  if (!b) return a
+  if (!a || !isValidDate(a)) return b
+  if (!b || !isValidDate(b)) return a
   return new Date(a) > new Date(b) ? a : b
 }
