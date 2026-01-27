@@ -7,7 +7,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* ═══════════════════════════════════════════════════════════
    LIGHT MODE — "IVORY"
    Mood: Private library, afternoon light, understated elegance
@@ -431,7 +430,9 @@ code:not(pre code) {
   }
 
   .card-hover {
-    @apply card transition-all;
+    @apply rounded-xl border shadow-sm transition-all;
+    background: var(--bg-surface);
+    border-color: var(--border-default);
     transition-duration: var(--duration-normal);
   }
 
@@ -443,7 +444,9 @@ code:not(pre code) {
 
   /* Interactive card with gradient border */
   .card-interactive {
-    @apply card cursor-pointer;
+    @apply rounded-xl border shadow-sm cursor-pointer;
+    background: var(--bg-surface);
+    border-color: var(--border-default);
     position: relative;
     transition: all var(--duration-normal) var(--ease-out);
   }
@@ -480,9 +483,11 @@ code:not(pre code) {
   }
 
   .btn-primary {
-    @apply btn;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
     background: var(--interactive-primary);
     color: var(--text-inverse);
+    transition-duration: var(--duration-fast);
+    transition-timing-function: var(--ease-out);
   }
   .btn-primary:hover:not(:disabled) {
     background: var(--interactive-primary-hover);

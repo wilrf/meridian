@@ -1,19 +1,10 @@
 import nextConfig from "eslint-config-next";
 
-export default [
+const eslintConfig = [
   {
     ignores: [".next/*", "node_modules/*"],
   },
   ...nextConfig,
-  {
-    rules: {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-        },
-      ],
-    },
-  },
 ];
+
+export default eslintConfig;
