@@ -77,16 +77,6 @@ export default function RootLayout({
         {/* Preconnect to critical origins */}
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         
-        
-        {/* 
-          Monaco Editor preloads - loaded only when needed via dynamic import
-          These hints help the browser prioritize fetching when the editor is requested
-        */}
-        <link
-          rel="prefetch"
-          href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"
-          as="script"
-        />
       </head>
       <body className="antialiased">
         <ThemeProvider>

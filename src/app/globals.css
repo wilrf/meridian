@@ -690,112 +690,6 @@ code:not(pre code) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MONACO EDITOR CUSTOMIZATIONS
-   ═══════════════════════════════════════════════════════════ */
-
-/* Font smoothing for the editor */
-.monaco-editor {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Line numbers styling */
-.monaco-editor .margin-view-overlays .line-numbers {
-  padding-right: 12px !important;
-  color: var(--editor-text-muted) !important;
-  transition: color 0.15s ease-out;
-}
-
-/* Active line number highlight */
-.monaco-editor .margin-view-overlays .line-numbers.active-line-number {
-  color: var(--editor-text) !important;
-}
-
-/* Scrollable element styling */
-.monaco-editor .monaco-scrollable-element {
-  border-radius: var(--radius-lg);
-}
-
-/* Content padding */
-.monaco-editor .lines-content {
-  padding-left: 8px !important;
-}
-
-/* Smooth cursor animation */
-.monaco-editor .cursor {
-  transition: opacity 0.1s ease-out;
-  will-change: transform, opacity;
-}
-
-/* Smoother scrollbar */
-.monaco-editor .scrollbar {
-  transition: opacity 0.2s ease-out;
-}
-
-.monaco-editor .scrollbar.invisible {
-  opacity: 0;
-}
-
-.monaco-editor:hover .scrollbar {
-  opacity: 1;
-}
-
-/* Selection highlight - smoother */
-.monaco-editor .view-overlays .selected-text {
-  transition: background-color 0.1s ease-out;
-}
-
-/* Line highlight - subtle animation */
-.monaco-editor .view-overlays .current-line {
-  transition: background-color 0.15s ease-out;
-}
-
-/* Suggestion widget styling */
-.monaco-editor .suggest-widget {
-  border-radius: var(--radius-md);
-  border: 1px solid var(--editor-gutter-border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  animation: scale-in var(--duration-fast) var(--ease-out);
-}
-
-/* Parameter hints styling */
-.monaco-editor .parameter-hints-widget {
-  border-radius: var(--radius-md);
-  border: 1px solid var(--editor-gutter-border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Hover widget styling */
-.monaco-editor .hover-contents {
-  border-radius: var(--radius-md);
-}
-
-/* Find widget styling */
-.monaco-editor .find-widget {
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Minimap disabled but just in case */
-.monaco-editor .minimap {
-  display: none !important;
-}
-
-/* Bracket matching - subtle glow */
-.monaco-editor .bracket-match {
-  background-color: var(--editor-bg-selection) !important;
-  border: 1px solid var(--syntax-operator) !important;
-  border-radius: 2px;
-}
-
-/* Word highlight - subtle */
-.monaco-editor .wordHighlight,
-.monaco-editor .wordHighlightStrong {
-  background-color: transparent !important;
-  border-bottom: 1px dotted var(--editor-text-muted);
-}
-
-/* ═══════════════════════════════════════════════════════════
    PROSE STYLING FOR MARKDOWN CONTENT
    ═══════════════════════════════════════════════════════════ */
 
@@ -1302,6 +1196,267 @@ code:not(pre code) {
   to {
     grid-template-rows: 0fr;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT EDITOR STYLES
+   Lightweight textarea-based editor with syntax highlighting
+   ═══════════════════════════════════════════════════════════ */
+
+/* Main editor container */
+.light-editor {
+  display: flex;
+  background: var(--editor-bg);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+/* Line numbers gutter */
+.light-editor-gutter {
+  padding: 16px 0;
+  background: var(--editor-bg);
+  border-right: 1px solid var(--editor-gutter-border);
+  user-select: none;
+  min-width: 52px;
+  flex-shrink: 0;
+}
+
+.light-line-number {
+  padding: 0 16px;
+  text-align: right;
+  color: var(--editor-text-muted);
+  transition: color 100ms ease-out;
+}
+
+.light-line-number.active {
+  color: var(--editor-text);
+}
+
+/* Editor content area */
+.light-editor-content {
+  flex: 1;
+  position: relative;
+  padding: 16px;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+/* Hidden textarea for input capture */
+.light-editor-input {
+  position: absolute;
+  inset: 16px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: transparent;
+  caret-color: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  resize: none;
+  z-index: 10;
+  padding: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow: hidden;
+}
+
+/* Visual layer with syntax highlighting */
+.light-editor-visual {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  pointer-events: none;
+  color: var(--editor-text);
+  min-height: 100%;
+}
+
+/* Character styling */
+.light-char {
+  display: inline;
+}
+
+.light-char.new {
+  animation: charFadeIn 50ms linear forwards;
+}
+
+@keyframes charFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.light-char.selected {
+  background: var(--editor-bg-selection);
+  border-radius: 2px;
+}
+
+/* Cursor */
+.light-editor-cursor {
+  position: absolute;
+  width: 2px;
+  height: 20px;
+  background: var(--editor-text);
+  pointer-events: none;
+  z-index: 50;
+  border-radius: 1px;
+  transition: left 50ms linear, top 50ms linear;
+  animation: cursorBlink 1s step-end infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 48% { opacity: 1; }
+  50%, 100% { opacity: 0.2; }
+}
+
+.light-editor-cursor.active {
+  animation: none;
+  opacity: 1;
+}
+
+/* Syntax highlighting classes */
+.syn-keyword {
+  color: var(--syntax-keyword);
+}
+
+.syn-function {
+  color: var(--syntax-function);
+}
+
+.syn-string {
+  color: var(--syntax-string);
+}
+
+.syn-number {
+  color: var(--syntax-number);
+}
+
+.syn-comment {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+
+.syn-operator {
+  color: var(--syntax-operator);
+}
+
+.syn-decorator {
+  color: var(--syntax-decorator);
+}
+
+/* Loading skeleton */
+.light-editor-skeleton {
+  background: var(--editor-bg);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.light-editor-skeleton-lines {
+  padding: 16px;
+}
+
+.light-editor-skeleton-line {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.light-editor-skeleton-number {
+  width: 20px;
+  height: 20px;
+  background: var(--editor-bg-highlight);
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.light-editor-skeleton-code {
+  height: 20px;
+  background: var(--editor-bg-highlight);
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Autocomplete panel */
+.autocomplete-panel {
+  position: absolute;
+  z-index: 100;
+  min-width: 200px;
+  max-width: 300px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--editor-bg-highlight);
+  border: 1px solid var(--editor-gutter-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  animation: autocompleteIn 100ms var(--ease-out-expo);
+}
+
+@keyframes autocompleteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background-color 100ms ease-out;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selected {
+  background: var(--editor-bg-selection);
+}
+
+.autocomplete-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.autocomplete-icon.keyword {
+  background: var(--syntax-keyword);
+  color: var(--editor-bg);
+}
+
+.autocomplete-icon.builtin {
+  background: var(--syntax-function);
+  color: var(--editor-bg);
+}
+
+.autocomplete-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--editor-text);
+}
+
+.autocomplete-match {
+  color: var(--syntax-function);
+  font-weight: 500;
+}
+
+.autocomplete-rest {
+  color: var(--editor-text);
 }
 
 /* === REDUCED MOTION === */

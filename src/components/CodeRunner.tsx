@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { usePyodide } from '@/lib/pyodide-context'
 import { useLessonContext } from '@/lib/lesson-context'
 import HintSystem from './HintSystem'
-import CodeEditor from './CodeEditor'
+import LightEditor from './LightEditor'
 
 interface CodeRunnerProps {
   initialCode: string
@@ -314,7 +314,7 @@ export default function CodeRunner({
     setJustSucceeded(false)
   }, [initialCode, isCompleted])
 
-  // Stable onChange with micro-debounce built into Monaco
+  // Stable onChange handler
   const handleCodeChange = useCallback((newCode: string) => {
     setCode(newCode)
   }, [])
@@ -450,7 +450,7 @@ export default function CodeRunner({
           transition: 'height 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        <CodeEditor
+        <LightEditor
           value={code}
           onChange={handleCodeChange}
           onRun={handleRun}
