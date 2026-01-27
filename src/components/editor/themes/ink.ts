@@ -18,6 +18,7 @@ import type { editor } from 'monaco-editor'
 export const inkThemeName = 'meridian-ink'
 
 // Color palette - matches CSS variables in globals.css
+// Updated for better contrast on dark background
 const colors = {
   // Backgrounds
   bg: '#0A0910',
@@ -26,23 +27,23 @@ const colors = {
   bgSelectionInactive: '#2D264080',
   bgSelectionHighlight: '#2D264040',
   
-  // Text
-  text: '#E0DDD6',
-  textMuted: '#6E6880',
-  textSubtle: '#A9A3B3',
+  // Text - increased brightness for better visibility
+  text: '#E8E5DE',          // Brighter off-white
+  textMuted: '#9089A0',     // Brighter muted (was #6E6880)
+  textSubtle: '#C4BED0',    // Brighter subtle
   
-  // Syntax - warm, muted palette
-  keyword: '#C9A0DC',      // Soft lavender
-  string: '#A8C4A0',       // Muted sage
-  number: '#D4B896',       // Soft gold
-  function: '#93B5CF',     // Dusty blue
-  comment: '#6E6880',      // Muted purple-gray
-  operator: '#B8A8C8',     // Light purple
-  decorator: '#B8A07E',    // Quiet gold
-  class: '#D4B896',        // Soft gold
-  constant: '#C9A0DC',     // Soft lavender
-  parameter: '#C4B8A0',    // Warm beige
-  punctuation: '#A9A3B3',  // Subtle gray
+  // Syntax - increased saturation and brightness for visibility
+  keyword: '#DDB8F0',       // Brighter lavender (was #C9A0DC)
+  string: '#B8D4A8',        // Brighter sage (was #A8C4A0)
+  number: '#E4C8A6',        // Brighter gold (was #D4B896)
+  function: '#A8CBE4',      // Brighter blue (was #93B5CF)
+  comment: '#9089A0',       // Brighter comment (was #6E6880)
+  operator: '#D0C0E0',      // Brighter purple (was #B8A8C8)
+  decorator: '#D4BC98',     // Brighter gold (was #B8A07E)
+  class: '#E4C8A6',         // Brighter gold (was #D4B896)
+  constant: '#DDB8F0',      // Brighter lavender (was #C9A0DC)
+  parameter: '#DCD0B8',     // Brighter beige (was #C4B8A0)
+  punctuation: '#C4BED0',   // Brighter gray (was #A9A3B3)
   
   // UI elements
   cursor: '#D4C5A9',       // Champagne
