@@ -60,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
+      setError(null) // Clear any previous auth errors on successful state change
       setLoading(false)
     })
 
