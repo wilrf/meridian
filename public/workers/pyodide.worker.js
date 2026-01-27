@@ -33,8 +33,17 @@ function validateCodeInput(code) {
 async function initPyodide() {
   if (pyodide) return pyodide
 
-  // Import Pyodide from CDN
-  importScripts(`${PYODIDE_CDN}pyodide.js`)
+  // Import Pyodide from CDN with error handling
+  try {
+    importScripts(`${PYODIDE_CDN}pyodide.js`)
+  } catch (error) {
+    const message = `Failed to load Pyodide from CDN: ${error.message || error}`
+    self.postMessage({
+      type: 'init_error',
+      error: message,
+    })
+    throw new Error(message)
+  }
 
   pyodide = await loadPyodide({
     indexURL: PYODIDE_CDN,

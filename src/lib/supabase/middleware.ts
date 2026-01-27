@@ -6,11 +6,16 @@ export async function updateSession(request: NextRequest) {
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseKey) {
-    // Log warning in development to help diagnose configuration issues
+    // In development, warn and continue (allows local development without Supabase)
     if (process.env.NODE_ENV === 'development') {
       console.warn('Supabase env vars missing in middleware, auth disabled')
+      return NextResponse.next({ request })
     }
-    return NextResponse.next({ request })
+    // In production, fail closed - return 500 error
+    console.error('CRITICAL: Supabase env vars missing in production middleware')
+    return new NextResponse('Internal Server Error: Authentication service unavailable', {
+      status: 500,
+    })
   }
 
   let supabaseResponse = NextResponse.next({

@@ -14,6 +14,15 @@ interface CodeRunnerProps {
   hints?: string[]
 }
 
+// Maximum output length to prevent browser freeze from massive DOM
+const MAX_OUTPUT_LENGTH = 10000
+const TYPEWRITER_THRESHOLD = 200
+
+function truncateOutput(text: string): string {
+  if (text.length <= MAX_OUTPUT_LENGTH) return text
+  return text.slice(0, MAX_OUTPUT_LENGTH) + `\n\n... (output truncated, ${text.length - MAX_OUTPUT_LENGTH} more characters)`
+}
+
 // Typewriter text component for smooth output reveal
 function TypewriterText({ text, enabled }: { text: string; enabled: boolean }) {
   if (!enabled) {
@@ -128,14 +137,31 @@ export default function CodeRunner({
   const buttonRef = useRef<HTMLButtonElement>(null)
   const isRunningRef = useRef(false) // Prevent double-click race conditions
   const mountedRef = useRef(true) // Track mount state for async safety
+  const timeoutIdsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set()) // Track timeouts for cleanup
 
   const { state: pyodideState, runCode, checkExpected, validateCode } = usePyodide()
 
-  // Track component mount state
+  // Helper to create tracked timeouts that auto-cleanup
+  const setTrackedTimeout = useCallback((callback: () => void, delay: number) => {
+    const id = setTimeout(() => {
+      timeoutIdsRef.current.delete(id)
+      if (mountedRef.current) {
+        callback()
+      }
+    }, delay)
+    timeoutIdsRef.current.add(id)
+    return id
+  }, [])
+
+  // Track component mount state and cleanup timeouts
   useEffect(() => {
     mountedRef.current = true
+    const timeoutIds = timeoutIdsRef.current
     return () => {
       mountedRef.current = false
+      // Clear all pending timeouts on unmount
+      timeoutIds.forEach(clearTimeout)
+      timeoutIds.clear()
     }
   }, [])
   const { lessonId } = useLessonContext()
@@ -237,7 +263,7 @@ export default function CodeRunner({
         const result = await runCode(code)
         if (!mountedRef.current) return
         resultOutput = result.stdout + (result.stderr ? `\nError: ${result.stderr}` : '')
-        setOutput(resultOutput || '(No output)')
+        setOutput(truncateOutput(resultOutput) || '(No output)')
         setStatus(result.success ? 'idle' : 'error')
         setIsRunning(false)
         setButtonState('idle')
@@ -246,7 +272,7 @@ export default function CodeRunner({
       }
 
       // Update output with new key to trigger typewriter
-      setOutput(resultOutput)
+      setOutput(truncateOutput(resultOutput))
       setOutputKey((k) => k + 1)
 
       // Handle button state transitions
@@ -256,10 +282,10 @@ export default function CodeRunner({
         setShowParticles(true)
 
         // Reset particles
-        setTimeout(() => setShowParticles(false), 900)
+        setTrackedTimeout(() => setShowParticles(false), 900)
 
         // Reset button after showing success
-        setTimeout(() => {
+        setTrackedTimeout(() => {
           setButtonState('idle')
           setJustSucceeded(false)
         }, 2500)
@@ -267,7 +293,7 @@ export default function CodeRunner({
         setButtonState('idle')
       }
     } catch (error) {
-      setOutput(`Error: ${error instanceof Error ? error.message : String(error)}`)
+      setOutput(truncateOutput(`Error: ${error instanceof Error ? error.message : String(error)}`))
       setStatus('error')
       setButtonState('idle')
       setOutputKey((k) => k + 1)
@@ -277,7 +303,7 @@ export default function CodeRunner({
         setIsRunning(false)
       }
     }
-  }, [code, isExercise, expected, validate, isCompleted, checkExpected, validateCode, runCode, saveExerciseCompletion])
+  }, [code, isExercise, expected, validate, isCompleted, checkExpected, validateCode, runCode, saveExerciseCompletion, setTrackedTimeout])
 
   const handleReset = useCallback(() => {
     setCode(initialCode)
@@ -519,7 +545,7 @@ export default function CodeRunner({
                     : 'text-[var(--text-primary)]'
                 }`}
               >
-                <TypewriterText text={output} enabled={output.length < 200} />
+                <TypewriterText text={output} enabled={output.length < TYPEWRITER_THRESHOLD} />
               </pre>
             )}
           </div>

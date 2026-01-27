@@ -8,6 +8,7 @@ interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
+  error: string | null
   signInWithGithub: () => Promise<void>
   signOut: () => Promise<void>
 }
@@ -18,6 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const supabase = createClient()
@@ -29,8 +31,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('Error getting user:', error)
           setUser(null)
           setSession(null)
+          setError('Failed to verify authentication. Please try refreshing the page.')
         } else {
           setUser(user)
+          setError(null)
           // Also get session for token access
           return supabase.auth.getSession()
         }
@@ -44,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error initializing auth:', error)
         setUser(null)
         setSession(null)
+        setError('Failed to initialize authentication. Please try refreshing the page.')
       })
       .finally(() => {
         setLoading(false)
@@ -90,10 +95,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       session,
       loading,
+      error,
       signInWithGithub,
       signOut,
     }),
-    [user, session, loading, signInWithGithub, signOut]
+    [user, session, loading, error, signInWithGithub, signOut]
   )
 
   return (

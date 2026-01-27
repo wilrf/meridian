@@ -8,9 +8,10 @@ import type { editor } from 'monaco-editor'
  */
 
 // CDN configuration for Monaco loader
+// Version must match the version bundled by @monaco-editor/react
 export const MONACO_CDN = {
-  base: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs',
-  version: '0.45.0',
+  base: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs',
+  version: '0.55.1',
 } as const
 
 /**

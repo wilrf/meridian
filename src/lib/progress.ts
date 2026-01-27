@@ -7,6 +7,45 @@ const PROGRESS_FILE = path.join(process.cwd(), 'data', 'progress.json')
 // Dangerous keys that could cause prototype pollution
 const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
 
+/**
+ * Deep merge lesson progress to preserve nested exercise data
+ */
+function deepMergeLessons(
+  target: Record<string, LessonProgress>,
+  source: Record<string, LessonProgress>
+): Record<string, LessonProgress> {
+  const result = { ...target }
+  for (const [key, value] of Object.entries(source)) {
+    if (FORBIDDEN_KEYS.has(key)) continue
+    const existing = result[key]
+    if (existing) {
+      result[key] = {
+        ...existing,
+        ...value,
+        exercises: { ...existing.exercises, ...(value.exercises ?? {}) },
+      }
+    } else {
+      result[key] = value
+    }
+  }
+  return result
+}
+
+/**
+ * Deep merge project progress
+ */
+function deepMergeProjects(
+  target: Record<string, ProjectProgress>,
+  source: Record<string, ProjectProgress>
+): Record<string, ProjectProgress> {
+  const result = { ...target }
+  for (const [key, value] of Object.entries(source)) {
+    if (FORBIDDEN_KEYS.has(key)) continue
+    result[key] = { ...result[key], ...value }
+  }
+  return result
+}
+
 export interface ExerciseProgress {
   completed: boolean
   completedAt?: string
@@ -129,12 +168,12 @@ export async function writeProgress(data: ProgressData): Promise<void> {
       retries: { retries: 5, minTimeout: 50, maxTimeout: 200 },
     })
 
-    // Re-read after acquiring lock to get latest state and merge
+    // Re-read after acquiring lock to get latest state and deep merge
     const current = readProgressInternal()
     const merged: ProgressData = {
       lastUpdated: new Date().toISOString(),
-      lessons: { ...current.lessons, ...data.lessons },
-      projects: { ...current.projects, ...data.projects },
+      lessons: deepMergeLessons(current.lessons, data.lessons),
+      projects: deepMergeProjects(current.projects, data.projects),
     }
 
     fs.writeFileSync(PROGRESS_FILE, JSON.stringify(merged, null, 2))
