@@ -197,7 +197,6 @@ export function getAdjacentLessons(
   // Import manifest dynamically to avoid circular dependencies
   let manifest: unknown
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     manifest = require('@/content/manifest.json')
   } catch (error) {
     console.error('Failed to load manifest.json:', error)

@@ -118,7 +118,6 @@ function CodeEditorInner({
   const [isMonacoLoaded, setIsMonacoLoaded] = useState(false)
   const [isReady, setIsReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [EditorComponent, setEditorComponent] = useState<React.ComponentType<Record<string, unknown>> | null>(null)
   
   // Refs
@@ -135,9 +134,9 @@ function CodeEditorInner({
   // Effects
   // =============================================================================
   
-  // Handle client-side mounting
+  // Handle client-side mounting (valid hydration pattern)
   useEffect(() => {
-    setIsMounted(true)
+    setIsMounted(true) // eslint-disable-line react-hooks/set-state-in-effect
   }, [])
   
   // Intersection Observer - load Monaco when visible

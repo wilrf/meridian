@@ -40,10 +40,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('light')
   const [mounted, setMounted] = useState(false)
 
-  // Initialize theme on mount
+  // Initialize theme on mount (valid hydration pattern)
   useEffect(() => {
     const stored = getStoredTheme()
     const initial = stored ?? getSystemTheme()
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- valid hydration pattern
     setThemeState(initial)
     setMounted(true)
   }, [])
