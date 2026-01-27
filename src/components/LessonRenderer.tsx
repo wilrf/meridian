@@ -19,6 +19,14 @@ const CodeRunner = dynamic(() => import('./CodeRunner'), {
   ),
 })
 
+// Dynamic import StaticCode for consistent Python highlighting
+const StaticCode = dynamic(() => import('./StaticCode'), {
+  ssr: false,
+  loading: () => (
+    <div className="my-4 h-24 bg-[var(--bg-subtle)] animate-pulse rounded-xl" />
+  ),
+})
+
 interface LessonRendererProps {
   content: string
   lessonId: string
@@ -171,7 +179,44 @@ const markdownComponents: Components = {
       )
     }
 
-    // Regular code block
+    // Regular code block - extract language and text
+    let language = ''
+    let codeText = ''
+
+    // Extract language from code element's className
+    const extractCodeInfo = (child: React.ReactNode): void => {
+      if (child && typeof child === 'object' && 'props' in child && child.props) {
+        const className = child.props.className as string | undefined
+        if (className?.includes('language-')) {
+          const match = className.match(/language-(\w+)/)
+          if (match?.[1]) language = match[1]
+        }
+        // Extract text content
+        const extractText = (node: React.ReactNode): void => {
+          if (typeof node === 'string') {
+            codeText += node
+          } else if (Array.isArray(node)) {
+            node.forEach(extractText)
+          } else if (node && typeof node === 'object' && 'props' in node && node.props) {
+            extractText(node.props.children)
+          }
+        }
+        extractText(child.props.children)
+      }
+    }
+
+    if (Array.isArray(children)) {
+      children.forEach(extractCodeInfo)
+    } else {
+      extractCodeInfo(children)
+    }
+
+    // Use StaticCode for Python to get consistent highlighting with LightEditor
+    if (language === 'python') {
+      return <StaticCode code={codeText.trim()} language="python" className="my-6" />
+    }
+
+    // Other languages use rehype-highlight
     return (
       <pre
         className="bg-[var(--editor-bg)] text-[var(--editor-text)] p-4 rounded-xl overflow-x-auto shadow-soft my-6"

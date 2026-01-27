@@ -1392,6 +1392,26 @@ code:not(pre code) {
   animation: pulse 1.5s ease-in-out infinite;
 }
 
+/* Static code block - matches LightEditor styling */
+.static-code {
+  background: var(--editor-bg);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.75;
+  padding: 16px 20px;
+  overflow-x: auto;
+  color: var(--editor-text);
+}
+
+.static-code code {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+  padding: 0;
+  border: none;
+}
+
 /* Autocomplete panel */
 .autocomplete-panel {
   position: absolute;
