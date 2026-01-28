@@ -17,6 +17,8 @@ interface ProjectWorkspaceProps {
   starterCode: string
   /** Optional validation code */
   validate?: string
+  /** Required Python packages for this project */
+  requiredPackages?: string[]
 }
 
 // LocalStorage key prefix
@@ -46,6 +48,7 @@ export default function ProjectWorkspace({
   content,
   starterCode,
   validate,
+  requiredPackages = [],
 }: ProjectWorkspaceProps) {
   // Panel sizes
   const [instructionsWidth, setInstructionsWidth] = useState(DEFAULT_INSTRUCTIONS_WIDTH)
@@ -74,10 +77,33 @@ export default function ProjectWorkspace({
   // Refs
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const workspaceRef = useRef<HTMLDivElement>(null)
+  const packagesLoadedRef = useRef(false)
+  const packagesLoadingRef = useRef(false)
 
   // Pyodide context
-  const { state: pyodideState, runCode, validateCode } = usePyodide()
+  const { state: pyodideState, runCode, validateCode, loadPackages } = usePyodide()
   const isPyodideReady = pyodideState.status === 'ready'
+
+  // Load required packages when Pyodide becomes ready
+  useEffect(() => {
+    if (requiredPackages.length === 0 || packagesLoadedRef.current || packagesLoadingRef.current) {
+      return
+    }
+
+    if (isPyodideReady) {
+      packagesLoadingRef.current = true
+      loadPackages(requiredPackages)
+        .then(() => {
+          packagesLoadedRef.current = true
+        })
+        .catch((error) => {
+          console.warn('Failed to load packages:', error)
+        })
+        .finally(() => {
+          packagesLoadingRef.current = false
+        })
+    }
+  }, [isPyodideReady, requiredPackages, loadPackages])
 
   // Progress context
   const { progress } = useProgress()

@@ -118,10 +118,7 @@ const instructionComponents: Components = {
       extractCodeInfo(children)
     }
 
-    // Use StaticCode for Python
-    if (language === 'python') {
-      return <StaticCode code={codeText.trim()} language="python" className="my-3 text-xs" />
-    }
+    // Fallback to standard pre tag for stability
 
     return (
       <pre className="bg-[var(--editor-bg)] text-[var(--editor-text)] p-3 rounded-lg overflow-x-auto my-3 text-xs">

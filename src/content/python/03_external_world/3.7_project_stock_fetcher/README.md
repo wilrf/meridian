@@ -1,4 +1,9 @@
-# Project 3.7: Stock Fetcher
+---
+title: "Stock Fetcher"
+requires: ["requests"]
+---
+
+# Stock Fetcher
 
 ## Overview
 
@@ -9,6 +14,7 @@ Build a stock/crypto data tool that fetches real prices from the internet, cache
 ## The Challenge
 
 Create a `StockFetcher` class that can:
+
 1. Fetch current cryptocurrency prices from a free API
 2. Cache results to avoid redundant requests
 3. Save data to files (CSV and JSON)
@@ -23,6 +29,7 @@ We'll use the **CoinGecko API** because it's completely free and requires no aut
 **Base URL**: `https://api.coingecko.com/api/v3`
 
 **Useful endpoints**:
+
 - `/simple/price?ids=bitcoin&vs_currencies=usd` - Get current price
 - `/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true` - Multiple coins with 24h change
 - `/coins/{id}/market_chart?vs_currency=usd&days=30` - Historical prices
@@ -131,6 +138,7 @@ Create a demo script that:
 ## When You're Done
 
 Test these scenarios:
+
 - Fetch a valid coin - should return data
 - Fetch an invalid coin - should raise a clear error
 - Disconnect from internet and try to fetch - should handle gracefully

@@ -1,4 +1,4 @@
-# Project 1.7: Number Analyzer
+# Number Analyzer
 
 ## Overview
 

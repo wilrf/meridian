@@ -165,4 +165,4 @@ function AutocompleteInner({
 }
 
 const Autocomplete = memo(AutocompleteInner)
-export default Autocomplete
+export { Autocomplete }

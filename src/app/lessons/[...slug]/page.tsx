@@ -44,7 +44,11 @@ export default async function LessonPage({ params }: PageProps) {
       <PyodidePreloader />
 
       <ErrorBoundary>
-        <LessonRenderer content={lesson.content} lessonId={lesson.slug} />
+        <LessonRenderer
+          content={lesson.content}
+          lessonId={lesson.slug}
+          requiredPackages={lesson.frontmatter.requires}
+        />
       </ErrorBoundary>
       <LessonNav prev={prev} next={next} />
     </div>

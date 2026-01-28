@@ -107,6 +107,7 @@ export default async function ProjectPage({ params }: PageProps) {
           content={project.content}
           starterCode={starterCode}
           validate={validateCode}
+          requiredPackages={project.frontmatter.requires}
         />
       </ErrorBoundary>
     </>

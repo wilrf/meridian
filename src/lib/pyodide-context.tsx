@@ -202,6 +202,13 @@ export function PyodideProvider({ children, eager = false }: PyodideProviderProp
         return
       }
 
+      // Handle package loading notification
+      if (type === 'loading_packages') {
+        const packages = event.data.packages as string[]
+        setState(s => ({ ...s, loadingProgress: `Loading ${packages.join(', ')}...` }))
+        return
+      }
+
       // Handle responses
       const pending = pendingRef.current.get(id)
       if (pending) {
@@ -210,6 +217,8 @@ export function PyodideProvider({ children, eager = false }: PyodideProviderProp
           clearTimeout(timeoutGraceRef.current)
           timeoutGraceRef.current = null
         }
+        // Clear loading progress when response arrives
+        setState(s => ({ ...s, loadingProgress: '' }))
         if (success) {
           pending.resolve(result)
         } else {

@@ -13,6 +13,133 @@ let pyodide = null
 let loadedPackages = new Set()
 let currentExecutionId = null
 
+// Map Python import names to Pyodide package names
+// (most are the same, but some differ)
+const IMPORT_TO_PACKAGE = {
+  'sklearn': 'scikit-learn',
+  'cv2': 'opencv-python',
+  'PIL': 'Pillow',
+  'yaml': 'pyyaml',
+  'bs4': 'beautifulsoup4',
+  'dateutil': 'python-dateutil',
+}
+
+// Standard library modules that don't need to be installed
+const STDLIB_MODULES = new Set([
+  'abc', 'aifc', 'argparse', 'array', 'ast', 'asynchat', 'asyncio', 'asyncore',
+  'atexit', 'audioop', 'base64', 'bdb', 'binascii', 'binhex', 'bisect',
+  'builtins', 'bz2', 'calendar', 'cgi', 'cgitb', 'chunk', 'cmath', 'cmd',
+  'code', 'codecs', 'codeop', 'collections', 'colorsys', 'compileall',
+  'concurrent', 'configparser', 'contextlib', 'contextvars', 'copy', 'copyreg',
+  'cProfile', 'crypt', 'csv', 'ctypes', 'curses', 'dataclasses', 'datetime',
+  'dbm', 'decimal', 'difflib', 'dis', 'distutils', 'doctest', 'email',
+  'encodings', 'enum', 'errno', 'faulthandler', 'fcntl', 'filecmp', 'fileinput',
+  'fnmatch', 'fractions', 'ftplib', 'functools', 'gc', 'getopt', 'getpass',
+  'gettext', 'glob', 'graphlib', 'grp', 'gzip', 'hashlib', 'heapq', 'hmac',
+  'html', 'http', 'imaplib', 'imghdr', 'imp', 'importlib', 'inspect', 'io',
+  'ipaddress', 'itertools', 'json', 'keyword', 'lib2to3', 'linecache', 'locale',
+  'logging', 'lzma', 'mailbox', 'mailcap', 'marshal', 'math', 'mimetypes',
+  'mmap', 'modulefinder', 'multiprocessing', 'netrc', 'nis', 'nntplib',
+  'numbers', 'operator', 'optparse', 'os', 'ossaudiodev', 'pathlib', 'pdb',
+  'pickle', 'pickletools', 'pipes', 'pkgutil', 'platform', 'plistlib', 'poplib',
+  'posix', 'posixpath', 'pprint', 'profile', 'pstats', 'pty', 'pwd', 'py_compile',
+  'pyclbr', 'pydoc', 'queue', 'quopri', 'random', 're', 'readline', 'reprlib',
+  'resource', 'rlcompleter', 'runpy', 'sched', 'secrets', 'select', 'selectors',
+  'shelve', 'shlex', 'shutil', 'signal', 'site', 'smtpd', 'smtplib', 'sndhdr',
+  'socket', 'socketserver', 'spwd', 'sqlite3', 'ssl', 'stat', 'statistics',
+  'string', 'stringprep', 'struct', 'subprocess', 'sunau', 'symtable', 'sys',
+  'sysconfig', 'syslog', 'tabnanny', 'tarfile', 'telnetlib', 'tempfile',
+  'termios', 'test', 'textwrap', 'threading', 'time', 'timeit', 'tkinter',
+  'token', 'tokenize', 'trace', 'traceback', 'tracemalloc', 'tty', 'turtle',
+  'turtledemo', 'types', 'typing', 'unicodedata', 'unittest', 'urllib', 'uu',
+  'uuid', 'venv', 'warnings', 'wave', 'weakref', 'webbrowser', 'winreg',
+  'winsound', 'wsgiref', 'xdrlib', 'xml', 'xmlrpc', 'zipapp', 'zipfile',
+  'zipimport', 'zlib', '_thread',
+  // Also include some common submodules
+  'collections.abc', 'os.path', 'urllib.request', 'urllib.parse',
+])
+
+/**
+ * Extract import names from Python code
+ * Handles: import X, import X as Y, from X import Y, from X.Y import Z
+ */
+function extractImports(code) {
+  const imports = new Set()
+
+  // Match "import X" and "import X as Y" (handles multiple: import X, Y, Z)
+  const importRegex = /^\s*import\s+([^#\n]+)/gm
+  let match
+  while ((match = importRegex.exec(code)) !== null) {
+    const importPart = match[1]
+    // Split by comma for multiple imports
+    const modules = importPart.split(',')
+    for (const mod of modules) {
+      // Get the module name (before "as" if present)
+      const moduleName = mod.trim().split(/\s+as\s+/)[0].trim()
+      // Get the top-level package (before any dots)
+      const topLevel = moduleName.split('.')[0]
+      if (topLevel) imports.add(topLevel)
+    }
+  }
+
+  // Match "from X import Y" and "from X.Y import Z"
+  const fromRegex = /^\s*from\s+([^\s.]+)/gm
+  while ((match = fromRegex.exec(code)) !== null) {
+    const moduleName = match[1].trim()
+    if (moduleName) imports.add(moduleName)
+  }
+
+  return Array.from(imports)
+}
+
+/**
+ * Get Pyodide package names for the given imports
+ * Filters out stdlib and maps import names to package names
+ */
+function getPackagesForImports(imports) {
+  const packages = []
+
+  for (const imp of imports) {
+    // Skip standard library modules
+    if (STDLIB_MODULES.has(imp)) continue
+
+    // Map import name to package name (or use import name if no mapping)
+    const packageName = IMPORT_TO_PACKAGE[imp] || imp
+    packages.push(packageName)
+  }
+
+  return packages
+}
+
+/**
+ * Auto-detect and load packages from code imports
+ */
+async function autoLoadImports(code) {
+  const imports = extractImports(code)
+  const packages = getPackagesForImports(imports)
+
+  if (packages.length > 0) {
+    // Filter to only packages not already loaded
+    const toLoad = packages.filter(pkg => !loadedPackages.has(pkg))
+    if (toLoad.length > 0) {
+      // Notify that we're loading packages
+      self.postMessage({
+        type: 'loading_packages',
+        packages: toLoad,
+      })
+
+      try {
+        await pyodide.loadPackage(toLoad)
+        toLoad.forEach(pkg => loadedPackages.add(pkg))
+      } catch (error) {
+        // Some packages might not exist in Pyodide - that's okay,
+        // the import will fail naturally with a clear error
+        console.warn('Failed to load some packages:', error.message)
+      }
+    }
+  }
+}
+
 /**
  * Validate code input before execution
  */
@@ -105,6 +232,9 @@ async function runCode(code, timeout = DEFAULT_TIMEOUT, executionId = null) {
   }
 
   currentExecutionId = executionId
+
+  // Auto-detect and load any imported packages
+  await autoLoadImports(code)
 
   // Wrap code in output capture
   const wrappedCode = `

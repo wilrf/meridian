@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo, memo } from 'react'
 import { tokenize, getTokenClass, type Token } from '@/lib/python-tokenizer'
-import Autocomplete from './Autocomplete'
+import { Autocomplete } from './Autocomplete'
 
 interface LightEditorProps {
   /** The code content */

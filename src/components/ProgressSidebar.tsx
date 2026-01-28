@@ -39,6 +39,11 @@ function ProgressSidebarComponent() {
     return null
   }, [pathname])
 
+  // Hide sidebar on project pages for full-screen IDE experience
+  if (pathname?.startsWith('/projects/')) {
+    return null
+  }
+
   return (
     <aside className="w-72 bg-[var(--bg-surface)] border-r border-[var(--border-default)] h-screen overflow-y-auto flex-shrink-0 flex flex-col">
       {/* Header */}
@@ -121,32 +126,29 @@ const PhaseSection = memo(function PhaseSection({
       {/* Phase Header */}
       <div className="flex items-center gap-2.5 mb-2 px-2">
         <span
-          className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold transition-colors ${
-            isPhaseComplete
+          className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold transition-colors ${isPhaseComplete
               ? 'bg-[var(--accent-subtle)] text-[var(--accent-base)]'
               : isPhaseActive
-              ? 'bg-[var(--accent-subtle)] text-[var(--accent-base)]'
-              : 'bg-[var(--bg-subtle)] text-[var(--text-tertiary)]'
-          }`}
+                ? 'bg-[var(--accent-subtle)] text-[var(--accent-base)]'
+                : 'bg-[var(--bg-subtle)] text-[var(--text-tertiary)]'
+            }`}
         >
           {isPhaseComplete ? '✓' : phaseNumber}
         </span>
         <h2
-          className={`text-[11px] font-semibold uppercase tracking-[0.06em] flex-1 transition-colors ${
-            isPhaseComplete
+          className={`text-[11px] font-semibold uppercase tracking-[0.06em] flex-1 transition-colors ${isPhaseComplete
               ? 'text-[var(--accent-base)]'
               : isPhaseActive
-              ? 'text-[var(--accent-base)]'
-              : 'text-[var(--text-muted)]'
-          }`}
+                ? 'text-[var(--accent-base)]'
+                : 'text-[var(--text-muted)]'
+            }`}
         >
           {phase.title}
         </h2>
         {!loading && completedCount > 0 && (
           <span
-            className={`text-[10px] font-medium tabular-nums ${
-              isPhaseComplete ? 'text-[var(--accent-base)]' : 'text-[var(--text-muted)]'
-            }`}
+            className={`text-[10px] font-medium tabular-nums ${isPhaseComplete ? 'text-[var(--accent-base)]' : 'text-[var(--text-muted)]'
+              }`}
           >
             {completedCount}/{phase.lessons.length}
           </span>
@@ -174,8 +176,8 @@ const PhaseSection = memo(function PhaseSection({
                   ${isActive
                     ? 'bg-[var(--accent-subtle)] text-[var(--accent-base)] font-medium'
                     : isCompleted
-                    ? 'text-[var(--text-tertiary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-secondary)]'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
+                      ? 'text-[var(--text-tertiary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-secondary)]'
+                      : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
                   }
                 `}
               >
@@ -186,10 +188,10 @@ const PhaseSection = memo(function PhaseSection({
                     ${isActive
                       ? 'bg-[var(--accent-base)]'
                       : isCompleted
-                      ? 'bg-[var(--accent-base)] opacity-40'
-                      : isInProgress
-                      ? 'bg-[var(--accent-glow)]'
-                      : 'bg-[var(--border-strong)]'
+                        ? 'bg-[var(--accent-base)] opacity-40'
+                        : isInProgress
+                          ? 'bg-[var(--accent-glow)]'
+                          : 'bg-[var(--border-strong)]'
                     }
                   `}
                 />

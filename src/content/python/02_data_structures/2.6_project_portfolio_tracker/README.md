@@ -1,4 +1,4 @@
-# Project 2.6: Portfolio Tracker
+# Portfolio Tracker
 
 ## Overview
 
@@ -19,6 +19,7 @@ Create a portfolio management system that tracks stock positions, records transa
 Build a `Stock` class that represents a position in a single stock. It should:
 
 **Store this data:**
+
 - Stock symbol (e.g., "AAPL")
 - Number of shares owned
 - Total cost basis (what you paid)
@@ -26,6 +27,7 @@ Build a `Stock` class that represents a position in a single stock. It should:
 - Transaction history
 
 **Provide these capabilities:**
+
 - `buy(shares, price)` - Record a purchase, update shares and cost basis
 - `sell(shares, price)` - Record a sale, calculate realized gain/loss using average cost method
 - Calculate average cost per share
@@ -33,6 +35,7 @@ Build a `Stock` class that represents a position in a single stock. It should:
 - Calculate unrealized gain/loss (both dollars and percentage)
 
 **Handle these edge cases:**
+
 - Can't sell more shares than you own
 - Prices and shares must be positive
 - Division by zero when calculating averages
@@ -46,12 +49,14 @@ Build a `Stock` class that represents a position in a single stock. It should:
 Build a `Portfolio` class that manages multiple stock positions. It should:
 
 **Store this data:**
+
 - Portfolio name
 - Cash balance
 - Dictionary of Stock positions (keyed by symbol)
 - Total realized gains from closed positions
 
 **Provide these capabilities:**
+
 - `deposit(amount)` / `withdraw(amount)` - Manage cash
 - `buy(symbol, shares, price)` - Buy shares (creates position if new, deducts cash)
 - `sell(symbol, shares, price)` - Sell shares (adds to cash, tracks realized gains)
@@ -63,6 +68,7 @@ Build a `Portfolio` class that manages multiple stock positions. It should:
 - Generate a summary report
 
 **Handle these edge cases:**
+
 - Can't buy if insufficient cash
 - Can't sell stock you don't own
 - Remove position from holdings when fully sold
@@ -128,6 +134,7 @@ Think about:
 ## When You're Done
 
 Test your system with various scenarios:
+
 - Buy and sell the same stock multiple times
 - Try to sell more than you own (should error)
 - Try to buy with insufficient cash (should error)

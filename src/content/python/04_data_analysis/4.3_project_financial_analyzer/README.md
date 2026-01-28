@@ -1,4 +1,9 @@
-# Project 4.3: Financial Data Analyzer
+---
+title: "Financial Data Analyzer"
+requires: ["numpy", "pandas"]
+---
+
+# Financial Data Analyzer
 
 ## Overview
 
@@ -75,6 +80,7 @@ Implement these classic metrics:
   - Only include negative returns in the volatility calculation
 
 **Interpretation**:
+
 - Sharpe < 0: Worse than risk-free (treasury bonds)
 - Sharpe 0-1: Acceptable
 - Sharpe 1-2: Good
@@ -156,6 +162,7 @@ prices = pd.Series(100 * np.cumprod(1 + returns), index=dates)
 ## When You're Done
 
 Verify your calculations:
+
 - Total return should match: (end_price / start_price) - 1
 - Sharpe ratio sign should match whether returns beat risk-free rate
 - Maximum drawdown should be negative (it's a loss)

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-28T01:58:39.329Z",
+  "generatedAt": "2026-01-28T03:40:45.459Z",
   "phases": [
     {
       "id": "01_foundations",
@@ -165,7 +165,7 @@
         },
         {
           "id": "01_foundations/1.7_project_number_analyzer",
-          "title": "Project 1.7: Number Analyzer",
+          "title": "Number Analyzer",
           "path": "python/01_foundations/1.7_project_number_analyzer/README.md",
           "order": 1.07,
           "orderTuple": [
@@ -320,7 +320,7 @@
         },
         {
           "id": "02_data_structures/2.6_project_portfolio_tracker",
-          "title": "Project 2.6: Portfolio Tracker",
+          "title": "Portfolio Tracker",
           "path": "python/02_data_structures/2.6_project_portfolio_tracker/README.md",
           "order": 2.06,
           "orderTuple": [
@@ -486,7 +486,7 @@
         },
         {
           "id": "03_external_world/3.7_project_stock_fetcher",
-          "title": "Project 3.7: Stock Fetcher",
+          "title": "Stock Fetcher",
           "path": "python/03_external_world/3.7_project_stock_fetcher/README.md",
           "order": 3.07,
           "orderTuple": [
@@ -495,7 +495,9 @@
             ""
           ],
           "exercises": [],
-          "requires": [],
+          "requires": [
+            "requests"
+          ],
           "prev": "03_external_world/3.6_testing",
           "next": null,
           "isProject": true
@@ -559,7 +561,7 @@
         },
         {
           "id": "04_data_analysis/4.3_project_financial_analyzer",
-          "title": "Project 4.3: Financial Data Analyzer",
+          "title": "Financial Data Analyzer",
           "path": "python/04_data_analysis/4.3_project_financial_analyzer/README.md",
           "order": 4.03,
           "orderTuple": [
@@ -568,7 +570,10 @@
             ""
           ],
           "exercises": [],
-          "requires": [],
+          "requires": [
+            "numpy",
+            "pandas"
+          ],
           "prev": "04_data_analysis/4.2_pandas",
           "next": null,
           "isProject": true,
@@ -609,7 +614,7 @@
         },
         {
           "id": "05_machine_learning/5.2_project_predictor",
-          "title": "Project 5.2: ML Price Predictor",
+          "title": "ML Price Predictor",
           "path": "python/05_machine_learning/5.2_project_predictor/README.md",
           "order": 5.02,
           "orderTuple": [
@@ -618,7 +623,11 @@
             ""
           ],
           "exercises": [],
-          "requires": [],
+          "requires": [
+            "numpy",
+            "pandas",
+            "scikit-learn"
+          ],
           "prev": "05_machine_learning/5.1_linear_regression",
           "next": null,
           "isProject": true,

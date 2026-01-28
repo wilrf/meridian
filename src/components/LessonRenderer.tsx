@@ -9,7 +9,8 @@ import type { Components } from 'react-markdown'
 import dynamic from 'next/dynamic'
 import ErrorBoundary from './ErrorBoundary'
 import { LessonProvider } from '@/lib/lesson-context'
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useEffect, useRef } from 'react'
+import { usePyodide } from '@/lib/pyodide-context'
 
 // Dynamic import CodeRunner to avoid SSR issues
 const CodeRunner = dynamic(() => import('./CodeRunner'), {
@@ -30,11 +31,44 @@ const StaticCode = dynamic(() => import('./StaticCode'), {
 interface LessonRendererProps {
   content: string
   lessonId: string
+  requiredPackages?: string[]
 }
 
-export default function LessonRenderer({ content, lessonId }: LessonRendererProps) {
+// Component to load required packages when a lesson mounts
+function PackageLoader({ packages }: { packages: string[] }) {
+  const { state, loadPackages } = usePyodide()
+  const loadedRef = useRef(false)
+  const loadingRef = useRef(false)
+
+  useEffect(() => {
+    // Only load packages once, and only when Pyodide is ready
+    if (packages.length === 0 || loadedRef.current || loadingRef.current) {
+      return
+    }
+
+    if (state.status === 'ready') {
+      loadingRef.current = true
+      loadPackages(packages)
+        .then(() => {
+          loadedRef.current = true
+        })
+        .catch((error) => {
+          console.warn('Failed to load packages:', error)
+        })
+        .finally(() => {
+          loadingRef.current = false
+        })
+    }
+  }, [packages, state.status, loadPackages])
+
+  return null
+}
+
+export default function LessonRenderer({ content, lessonId, requiredPackages = [] }: LessonRendererProps) {
   return (
     <LessonProvider lessonId={lessonId}>
+      {/* Load required packages when Pyodide is ready */}
+      {requiredPackages.length > 0 && <PackageLoader packages={requiredPackages} />}
       <article className="prose prose-neutral max-w-none prose-headings:font-sans prose-headings:text-[var(--text-primary)] prose-p:font-prose prose-p:text-lg prose-p:text-[var(--text-secondary)] prose-strong:text-[var(--text-primary)] prose-a:text-accent hover:prose-a:text-accent-strong prose-li:font-prose prose-li:text-[var(--text-secondary)]">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkCodeMeta]}

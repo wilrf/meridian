@@ -1,4 +1,9 @@
-# Project 5.2: ML Price Predictor
+---
+title: "ML Price Predictor"
+requires: ["numpy", "pandas", "scikit-learn"]
+---
+
+# ML Price Predictor
 
 ## Overview
 
@@ -19,6 +24,7 @@ Can we predict tomorrow's price based on today's data? This is one of the hardes
 ## The Challenge
 
 Build a complete ML pipeline that:
+
 1. Prepares time series data for machine learning
 2. Engineers meaningful features
 3. Trains and evaluates a prediction model
@@ -37,6 +43,7 @@ Start with historical price data. Your data prep should:
 - Create a target variable (what you're predicting)
 
 **Target options** (choose one):
+
 - Next-day return (continuous - regression)
 - Direction (up/down - classification)
 - Threshold crossing (>1% move - classification)
@@ -50,17 +57,20 @@ Start with historical price data. Your data prep should:
 Create features that might predict price movements. Ideas to explore:
 
 **Price-based features**:
+
 - Returns over various lookback periods
 - Moving averages
 - Price position relative to moving averages
 - Rolling volatility
 
 **Technical indicators**:
+
 - RSI (Relative Strength Index)
 - MACD (Moving Average Convergence Divergence)
 - Bollinger Band position
 
 **Lagged features**:
+
 - Previous days' returns
 - Pattern features
 
@@ -71,11 +81,13 @@ Create features that might predict price movements. Ideas to explore:
 ### Part 3: Train/Test Split
 
 **Wrong approach** (common mistake): Random split
+
 - Mixes future and past data
 - Model "learns" from the future
 - Results look great, model fails in reality
 
 **Correct approach**: Time-based split
+
 - Train on earlier data chronologically
 - Test on later data chronologically
 - Never let training see future data
@@ -106,10 +118,12 @@ Use scikit-learn for all models.
 ### Part 5: Evaluation
 
 **For regression** (predicting returns):
+
 - RMSE, MAE, R²
 - Compare to baseline (predicting mean)
 
 **For classification** (predicting direction):
+
 - Accuracy (beware class imbalance!)
 - Precision, Recall, F1
 - Confusion matrix
@@ -121,6 +135,7 @@ Use scikit-learn for all models.
 ### Part 6: Analysis & Reflection
 
 Answer honestly:
+
 - Which features matter most? (feature importance)
 - Does the model beat the baseline?
 - Would this model actually be useful?
@@ -180,6 +195,7 @@ prices = pd.DataFrame({
 ## When You're Done
 
 Be honest in your conclusions:
+
 - Most price prediction models don't beat buy-and-hold
 - A "70% accurate" model might still lose money
 - Understanding *why* prediction is hard is valuable
