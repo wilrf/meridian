@@ -169,8 +169,61 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 Only `NEXT_PUBLIC_*` variables are exposed to browser.
 
+## Client Components
+
+All components using hooks, browser APIs, or interactivity need the `'use client'` directive:
+
+```typescript
+'use client'  // Required at top of file
+
+import { useState } from 'react'
+// ...
+```
+
+Key client components:
+- `shared/ui/MeridianLogo.tsx` - SVG logo component
+- `shared/ui/ThemeToggle.tsx` - Theme switcher
+- `shared/lib/theme-context.tsx` - Theme provider
+- `features/auth/lib/auth-context.tsx` - Auth provider
+- All components using `useProgress()`, `usePyodide()`, `useTheme()`
+
+## Common Issues
+
+### Hydration Warnings in Development
+
+React DevTools can cause non-blocking hydration warnings in development mode. These typically appear as:
+- "Element type is invalid: expected a string... but got: undefined"
+- Warnings about components receiving promises
+
+If the page renders correctly, these are usually safe to ignore in development. For production, ensure:
+1. All client components have `'use client'` directive
+2. No debug logging code (e.g., fetch calls to localhost ports)
+3. Dynamic imports resolve to valid components
+
+### Dynamic Imports
+
+When using `next/dynamic`, ensure the imported module exports what you expect:
+
+```typescript
+// ✅ GOOD - Module has default export
+const Component = dynamic(() => import('./Component'))
+
+// ✅ GOOD - Named export with explicit extraction
+const Component = dynamic(() =>
+  import('./module').then(mod => mod.Component)
+)
+
+// ❌ BAD - Trying to get named export as default
+const Component = dynamic(() =>
+  import('./module').then(mod => ({ default: mod.Something }))
+)  // Fails if mod.Something is undefined
+```
+
+Remove unused dynamic imports—they can cause lazy loading errors even if not rendered.
+
 ## Security
 
 - Security headers configured in `next.config.mjs` and `vercel.json`
 - Pyodide workers require COOP/COEP headers (configured for `/workers/` path)
 - Never commit `.env` files, API keys, or credentials
+- Never add debug logging that makes external requests (even to localhost)

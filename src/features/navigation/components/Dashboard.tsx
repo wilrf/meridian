@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useProgress } from '@/features/progress/hooks/use-progress'
 import manifest from '@/content/manifest.json'
 import StatsBar from '@/features/navigation/components/StatsBar'
-import MeridianLogo from '@/components/MeridianLogo'
+import { MeridianLogo } from '@/shared/ui'
 
 interface Lesson {
   id: string
@@ -228,6 +228,7 @@ function PhaseCard({
         {nextLesson && (
           <Link
             href={`/lessons/${nextLesson.id}`}
+            prefetch={false}
             className={`w-full ${
               percentage === 100
                 ? 'btn-secondary'

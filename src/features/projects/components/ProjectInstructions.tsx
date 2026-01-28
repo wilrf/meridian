@@ -6,15 +6,6 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { Components } from 'react-markdown'
 import React from 'react'
-import dynamic from 'next/dynamic'
-
-// Dynamic import StaticCode from editor feature for consistent Python highlighting
-const StaticCode = dynamic(() => import('@/features/editor').then(mod => ({ default: mod.StaticCode })), {
-  ssr: false,
-  loading: () => (
-    <div className="my-4 h-24 bg-[var(--bg-subtle)] animate-pulse rounded-xl" />
-  ),
-})
 
 interface ProjectInstructionsProps {
   /** Markdown content to render */

@@ -1,3 +1,5 @@
+'use client'
+
 interface MeridianLogoProps {
   size?: 'sm' | 'md' | 'lg'
   variant?: 'mark' | 'wordmark'

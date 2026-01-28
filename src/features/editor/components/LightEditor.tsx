@@ -176,30 +176,20 @@ function LightEditorInner({
   }, [getCursorInfo, getCurrentWord, readOnly, fontMetrics])
 
   // Handle input change
-  const handleInput = useCallback(() => {
-    const textarea = textareaRef.current
-    if (!textarea || readOnly) return
+  const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (readOnly) return
 
-    const newValue = textarea.value
+    // IMPORTANT: Read from e.target.value, not from ref
+    const newValue = e.target.value
 
-    // Track whether value changed (callback runs synchronously)
-    let valueChanged = false
-    setLastText(prev => {
-      if (prev !== newValue) {
-        valueChanged = true
-        return newValue
-      }
-      return prev
-    })
-
-    // Notify parent AFTER state setter, not inside it
-    // (calling onChange inside setLastText callback causes "setState during render" error)
-    if (valueChanged) {
+    // Only call onChange if the value actually changed from the prop
+    if (newValue !== value) {
+      setLastText(newValue)
       onChange?.(newValue)
     }
 
     updateCursor()
-  }, [onChange, updateCursor, readOnly])
+  }, [onChange, updateCursor, readOnly, value])
 
   // Handle keydown
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
