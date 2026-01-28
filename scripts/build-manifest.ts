@@ -20,6 +20,8 @@ interface Lesson {
   requires: string[]
   prev: string | null
   next: string | null
+  isProject: boolean // Whether this is a project (uses workspace layout)
+  starterCode?: string // Initial code for project editor
 }
 
 /**
@@ -119,7 +121,29 @@ function extractExerciseIds(content: string): string[] {
   return exercises.sort()
 }
 
-function parseLesson(filePath: string, phaseId: string): Lesson | null {
+/**
+ * Extract starter code from the first Python code block in content
+ */
+function extractStarterCode(content: string): string | undefined {
+  // Look for the first Python code block
+  const codeBlockRegex = /```python\n([\s\S]*?)```/
+  const match = content.match(codeBlockRegex)
+
+  if (match?.[1]) {
+    return match[1].trim()
+  }
+
+  return undefined
+}
+
+/**
+ * Check if a folder name indicates a project
+ */
+function isProjectFolder(folderName: string): boolean {
+  return folderName.includes('project')
+}
+
+function parseLesson(filePath: string, phaseId: string, isProject: boolean = false): Lesson | null {
   try {
     const content = fs.readFileSync(filePath, 'utf-8')
     const { data: frontmatter, content: markdownContent } = matter(content)
@@ -139,6 +163,9 @@ function parseLesson(filePath: string, phaseId: string): Lesson | null {
     // Extract exercise IDs
     const exercises = extractExerciseIds(markdownContent)
 
+    // Extract starter code for projects
+    const starterCode = isProject ? extractStarterCode(markdownContent) : undefined
+
     return {
       id: lessonId,
       title,
@@ -149,6 +176,8 @@ function parseLesson(filePath: string, phaseId: string): Lesson | null {
       requires,
       prev: (frontmatter.prev as string) || null,
       next: (frontmatter.next as string) || null,
+      isProject,
+      starterCode,
     }
   } catch (error) {
     console.error(`Error parsing ${filePath}:`, error)
@@ -168,7 +197,7 @@ function parsePhase(phasePath: string, phaseName: string): Phase | null {
 
     for (const entry of entries) {
       if (entry.isFile() && entry.name.endsWith('.md')) {
-        const lesson = parseLesson(path.join(phasePath, entry.name), phaseName)
+        const lesson = parseLesson(path.join(phasePath, entry.name), phaseName, false)
         if (lesson) {
           lessons.push(lesson)
         }
@@ -176,7 +205,8 @@ function parsePhase(phasePath: string, phaseName: string): Phase | null {
         // Check for project README.md
         const readmePath = path.join(phasePath, entry.name, 'README.md')
         if (fs.existsSync(readmePath)) {
-          const lesson = parseLesson(readmePath, phaseName)
+          const isProject = isProjectFolder(entry.name)
+          const lesson = parseLesson(readmePath, phaseName, isProject)
           if (lesson) {
             // Adjust the path for project folders
             lesson.path = `python/${phaseName}/${entry.name}/README.md`

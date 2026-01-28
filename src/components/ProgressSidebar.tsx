@@ -15,6 +15,7 @@ interface Lesson {
   path: string
   order: number
   exercises: string[]
+  isProject?: boolean
 }
 
 interface Phase {
@@ -28,20 +29,23 @@ function ProgressSidebarComponent() {
   const pathname = usePathname()
   const { progress, loading } = useProgress()
 
-  const currentSlug = useMemo(
-    () => pathname?.startsWith('/lessons/')
-      ? pathname.replace('/lessons/', '')
-      : null,
-    [pathname]
-  )
+  const currentSlug = useMemo(() => {
+    if (pathname?.startsWith('/lessons/')) {
+      return pathname.replace('/lessons/', '')
+    }
+    if (pathname?.startsWith('/projects/')) {
+      return pathname.replace('/projects/', '')
+    }
+    return null
+  }, [pathname])
 
   return (
     <aside className="w-72 bg-[var(--bg-surface)] border-r border-[var(--border-default)] h-screen overflow-y-auto flex-shrink-0 flex flex-col">
       {/* Header */}
       <div className="px-6 pt-6 pb-5">
         <Link href="/" className="flex items-center gap-4 group">
-          <div className="w-11 h-11 rounded-xl bg-[#1E3A5F] flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200 group-hover:scale-[1.02]">
-            <MeridianLogo size="sm" className="text-white" />
+          <div className="w-11 h-11 rounded-xl bg-[var(--interactive-primary)] flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200 group-hover:scale-[1.02]">
+            <MeridianLogo size="sm" className="text-[var(--text-inverse)]" />
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-[17px] font-semibold text-[var(--text-primary)] tracking-[-0.01em]">
@@ -119,9 +123,9 @@ const PhaseSection = memo(function PhaseSection({
         <span
           className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold transition-colors ${
             isPhaseComplete
-              ? 'bg-[#1E3A5F]/10 text-[#1E3A5F]'
+              ? 'bg-[var(--accent-subtle)] text-[var(--accent-base)]'
               : isPhaseActive
-              ? 'bg-[#1E3A5F]/10 text-[#1E3A5F]'
+              ? 'bg-[var(--accent-subtle)] text-[var(--accent-base)]'
               : 'bg-[var(--bg-subtle)] text-[var(--text-tertiary)]'
           }`}
         >
@@ -130,9 +134,9 @@ const PhaseSection = memo(function PhaseSection({
         <h2
           className={`text-[11px] font-semibold uppercase tracking-[0.06em] flex-1 transition-colors ${
             isPhaseComplete
-              ? 'text-[#1E3A5F]'
+              ? 'text-[var(--accent-base)]'
               : isPhaseActive
-              ? 'text-[#1E3A5F]'
+              ? 'text-[var(--accent-base)]'
               : 'text-[var(--text-muted)]'
           }`}
         >
@@ -141,7 +145,7 @@ const PhaseSection = memo(function PhaseSection({
         {!loading && completedCount > 0 && (
           <span
             className={`text-[10px] font-medium tabular-nums ${
-              isPhaseComplete ? 'text-[#1E3A5F]' : 'text-[var(--text-muted)]'
+              isPhaseComplete ? 'text-[var(--accent-base)]' : 'text-[var(--text-muted)]'
             }`}
           >
             {completedCount}/{phase.lessons.length}
@@ -156,7 +160,10 @@ const PhaseSection = memo(function PhaseSection({
           const lessonStatus = progress?.lessons[lesson.id]?.status
           const isCompleted = lessonStatus === 'completed'
           const isInProgress = lessonStatus === 'in_progress'
-          const href = `/lessons/${lesson.id}`
+          // Route projects to /projects/, lessons to /lessons/
+          const href = lesson.isProject
+            ? `/projects/${lesson.id}`
+            : `/lessons/${lesson.id}`
 
           return (
             <li key={lesson.id}>
@@ -165,7 +172,7 @@ const PhaseSection = memo(function PhaseSection({
                 className={`
                   flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] transition-all duration-150
                   ${isActive
-                    ? 'bg-[#1E3A5F]/8 text-[#1E3A5F] font-medium'
+                    ? 'bg-[var(--accent-subtle)] text-[var(--accent-base)] font-medium'
                     : isCompleted
                     ? 'text-[var(--text-tertiary)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-secondary)]'
                     : 'text-[var(--text-secondary)] hover:bg-[var(--bg-subtle)]'
@@ -177,16 +184,21 @@ const PhaseSection = memo(function PhaseSection({
                   className={`
                     w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors
                     ${isActive
-                      ? 'bg-[#1E3A5F]'
+                      ? 'bg-[var(--accent-base)]'
                       : isCompleted
-                      ? 'bg-[#1E3A5F]/40'
+                      ? 'bg-[var(--accent-base)] opacity-40'
                       : isInProgress
-                      ? 'bg-[#B8A07E]'
+                      ? 'bg-[var(--accent-glow)]'
                       : 'bg-[var(--border-strong)]'
                     }
                   `}
                 />
-                <span className="truncate">{lesson.title}</span>
+                <span className="truncate">
+                  {lesson.isProject && (
+                    <span className="mr-1.5 text-[10px] text-[var(--accent-glow)]">●</span>
+                  )}
+                  {lesson.title}
+                </span>
               </Link>
             </li>
           )

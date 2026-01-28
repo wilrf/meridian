@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-01-27T21:31:06.461Z",
+  "generatedAt": "2026-01-28T01:58:39.329Z",
   "phases": [
     {
       "id": "01_foundations",
@@ -23,7 +23,8 @@
           ],
           "requires": [],
           "prev": null,
-          "next": "1.2_variables_and_memory"
+          "next": "1.2_variables_and_memory",
+          "isProject": false
         },
         {
           "id": "01_foundations/1.2_variables_and_memory",
@@ -42,7 +43,8 @@
           ],
           "requires": [],
           "prev": "1.1_what_is_python",
-          "next": "1.3_data_types"
+          "next": "1.3_data_types",
+          "isProject": false
         },
         {
           "id": "01_foundations/1.3_data_types",
@@ -64,7 +66,8 @@
           ],
           "requires": [],
           "prev": "1.2_variables_and_memory",
-          "next": "1.4_operators"
+          "next": "1.4_operators",
+          "isProject": false
         },
         {
           "id": "01_foundations/1.4_operators",
@@ -84,7 +87,8 @@
           ],
           "requires": [],
           "prev": "1.3_data_types",
-          "next": "1.5_control_flow"
+          "next": "1.5_control_flow",
+          "isProject": false
         },
         {
           "id": "01_foundations/1.4a_strings",
@@ -105,7 +109,8 @@
           ],
           "requires": [],
           "prev": "1.4_operators",
-          "next": "1.5_control_flow"
+          "next": "1.5_control_flow",
+          "isProject": false
         },
         {
           "id": "01_foundations/1.5_control_flow",
@@ -128,7 +133,8 @@
           ],
           "requires": [],
           "prev": "1.4_operators",
-          "next": "1.6_loops"
+          "next": "1.6_loops",
+          "isProject": false
         },
         {
           "id": "01_foundations/1.6_loops",
@@ -154,7 +160,8 @@
           ],
           "requires": [],
           "prev": "1.5_control_flow",
-          "next": "1.7_project_number_analyzer"
+          "next": "1.7_project_number_analyzer",
+          "isProject": false
         },
         {
           "id": "01_foundations/1.7_project_number_analyzer",
@@ -169,7 +176,9 @@
           "exercises": [],
           "requires": [],
           "prev": "01_foundations/1.6_loops",
-          "next": null
+          "next": null,
+          "isProject": true,
+          "starterCode": "# Your data\nprices = [\n    152.30, 154.20, 151.80, 155.60, 158.90, 157.20, 159.80, 162.40, 160.50, 163.20,\n    165.80, 164.30, 166.90, 168.20, 165.50, 163.80, 167.40, 170.20, 172.50, 169.80,\n    171.30, 174.60, 173.20, 176.80, 175.40, 178.90, 177.50, 180.20, 182.60, 179.30\n]"
         }
       ]
     },
@@ -196,7 +205,8 @@
           ],
           "requires": [],
           "prev": "1.6_loops",
-          "next": "2.2_dictionaries"
+          "next": "2.2_dictionaries",
+          "isProject": false
         },
         {
           "id": "02_data_structures/2.2_dictionaries",
@@ -217,7 +227,8 @@
           ],
           "requires": [],
           "prev": "2.1_lists",
-          "next": "2.3_sets_and_tuples"
+          "next": "2.3_sets_and_tuples",
+          "isProject": false
         },
         {
           "id": "02_data_structures/2.3_sets_and_tuples",
@@ -235,7 +246,8 @@
           ],
           "requires": [],
           "prev": "2.2_dictionaries",
-          "next": "2.4_functions"
+          "next": "2.4_functions",
+          "isProject": false
         },
         {
           "id": "02_data_structures/2.3a_error_handling",
@@ -255,7 +267,8 @@
           ],
           "requires": [],
           "prev": "2.3_sets_and_tuples",
-          "next": "2.4_functions"
+          "next": "2.4_functions",
+          "isProject": false
         },
         {
           "id": "02_data_structures/2.4_functions",
@@ -279,7 +292,8 @@
           ],
           "requires": [],
           "prev": "2.3_sets_and_tuples",
-          "next": "2.5_classes"
+          "next": "2.5_classes",
+          "isProject": false
         },
         {
           "id": "02_data_structures/2.5_classes",
@@ -301,7 +315,8 @@
           ],
           "requires": [],
           "prev": "2.4_functions",
-          "next": "3.1_files"
+          "next": "3.1_files",
+          "isProject": false
         },
         {
           "id": "02_data_structures/2.6_project_portfolio_tracker",
@@ -316,7 +331,8 @@
           "exercises": [],
           "requires": [],
           "prev": "02_data_structures/2.5_classes",
-          "next": null
+          "next": null,
+          "isProject": true
         }
       ]
     },
@@ -340,7 +356,8 @@
           ],
           "requires": [],
           "prev": "2.5_classes",
-          "next": "3.2_virtual_environments"
+          "next": "3.2_virtual_environments",
+          "isProject": false
         },
         {
           "id": "03_external_world/3.1a_csv_json",
@@ -360,7 +377,8 @@
           ],
           "requires": [],
           "prev": "3.1_files",
-          "next": "3.2_apis"
+          "next": "3.2_apis",
+          "isProject": false
         },
         {
           "id": "03_external_world/3.2_virtual_environments",
@@ -377,7 +395,8 @@
           ],
           "requires": [],
           "prev": "3.1_modules_and_imports",
-          "next": "3.3_files"
+          "next": "3.3_files",
+          "isProject": false
         },
         {
           "id": "03_external_world/3.3_files",
@@ -399,7 +418,8 @@
           ],
           "requires": [],
           "prev": "3.2_virtual_environments",
-          "next": "3.4_apis"
+          "next": "3.4_apis",
+          "isProject": false
         },
         {
           "id": "03_external_world/3.4_apis",
@@ -423,7 +443,8 @@
             "requests"
           ],
           "prev": "3.3_files",
-          "next": "3.5_debugging"
+          "next": "3.5_debugging",
+          "isProject": false
         },
         {
           "id": "03_external_world/3.5_debugging",
@@ -440,7 +461,8 @@
           ],
           "requires": [],
           "prev": "3.4_apis",
-          "next": "3.6_testing"
+          "next": "3.6_testing",
+          "isProject": false
         },
         {
           "id": "03_external_world/3.6_testing",
@@ -459,7 +481,8 @@
             "pytest"
           ],
           "prev": "3.5_debugging",
-          "next": "3.7_project_stock_fetcher"
+          "next": "3.7_project_stock_fetcher",
+          "isProject": false
         },
         {
           "id": "03_external_world/3.7_project_stock_fetcher",
@@ -471,14 +494,11 @@
             7,
             ""
           ],
-          "exercises": [
-            "4.1",
-            "4.2",
-            "4.3"
-          ],
+          "exercises": [],
           "requires": [],
           "prev": "03_external_world/3.6_testing",
-          "next": null
+          "next": null,
+          "isProject": true
         }
       ]
     },
@@ -509,7 +529,8 @@
             "numpy"
           ],
           "prev": "3.2_apis",
-          "next": "4.2_pandas"
+          "next": "4.2_pandas",
+          "isProject": false
         },
         {
           "id": "04_data_analysis/4.2_pandas",
@@ -533,7 +554,8 @@
             "pandas"
           ],
           "prev": "4.1_numpy",
-          "next": "5.1_linear_regression"
+          "next": "5.1_linear_regression",
+          "isProject": false
         },
         {
           "id": "04_data_analysis/4.3_project_financial_analyzer",
@@ -545,15 +567,12 @@
             3,
             ""
           ],
-          "exercises": [
-            "4.3.1",
-            "4.3.2",
-            "4.3.3",
-            "4.3.4"
-          ],
+          "exercises": [],
           "requires": [],
           "prev": "04_data_analysis/4.2_pandas",
-          "next": null
+          "next": null,
+          "isProject": true,
+          "starterCode": "analyzer = FinancialAnalyzer(prices)  # prices is a pd.Series with datetime index"
         }
       ]
     },
@@ -585,7 +604,8 @@
             "scikit-learn"
           ],
           "prev": "4.2_pandas",
-          "next": "05_machine_learning/5.2_project_predictor"
+          "next": "05_machine_learning/5.2_project_predictor",
+          "isProject": false
         },
         {
           "id": "05_machine_learning/5.2_project_predictor",
@@ -597,15 +617,12 @@
             2,
             ""
           ],
-          "exercises": [
-            "5.2.1",
-            "5.2.2",
-            "5.2.3",
-            "5.2.4"
-          ],
+          "exercises": [],
           "requires": [],
           "prev": "05_machine_learning/5.1_linear_regression",
-          "next": null
+          "next": null,
+          "isProject": true,
+          "starterCode": "import numpy as np\nimport pandas as pd\n\nnp.random.seed(42)\nn_days = 500\ndates = pd.date_range('2022-01-01', periods=n_days, freq='D')\nreturns = np.random.normal(0.0003, 0.02, n_days)\nprices = pd.DataFrame({\n    'close': 100 * np.cumprod(1 + returns)\n}, index=dates)"
         }
       ]
     },
@@ -627,7 +644,8 @@
           "exercises": [],
           "requires": [],
           "prev": null,
-          "next": "06_capstones/6.1_monte_carlo_simulator"
+          "next": "06_capstones/6.1_monte_carlo_simulator",
+          "isProject": false
         },
         {
           "id": "06_capstones/6.1_monte_carlo_simulator",
@@ -642,7 +660,8 @@
           "exercises": [],
           "requires": [],
           "prev": "06_capstones/README",
-          "next": "06_capstones/6.2_sentiment_analyzer"
+          "next": "06_capstones/6.2_sentiment_analyzer",
+          "isProject": false
         },
         {
           "id": "06_capstones/6.2_sentiment_analyzer",
@@ -657,7 +676,8 @@
           "exercises": [],
           "requires": [],
           "prev": "06_capstones/6.1_monte_carlo_simulator",
-          "next": "06_capstones/6.3_backtesting_system"
+          "next": "06_capstones/6.3_backtesting_system",
+          "isProject": false
         },
         {
           "id": "06_capstones/6.3_backtesting_system",
@@ -672,7 +692,8 @@
           "exercises": [],
           "requires": [],
           "prev": "06_capstones/6.2_sentiment_analyzer",
-          "next": null
+          "next": null,
+          "isProject": false
         }
       ]
     }

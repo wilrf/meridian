@@ -1,0 +1,9 @@
+# Docker Testing Sandbox - Ignore build artifacts
+node_modules
+.next
+.git
+*.log
+test-results
+test-screenshots
+playwright-report
+coverage

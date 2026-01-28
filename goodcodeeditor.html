@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meridian — Exercise 1.1</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #f9f9f9;
+      --surface: #0D0D0D;
+      --surface-elevated: #1a1a1a;
+      --text: #1a1a1a;
+      --text-secondary: #666666;
+      --text-code: #e8e8e8;
+      --text-code-dim: rgba(255,255,255,0.5);
+      --border: #e5e5e5;
+      --border-code: rgba(255,255,255,0.1);
+      --accent: #3d5a80;
+      --accent-hover: #4a6d94;
+      --accent-glow: rgba(61, 90, 128, 0.4);
+      --success: #4ade80;
+      --success-bg: rgba(74, 222, 128, 0.1);
+      --success-glow: rgba(74, 222, 128, 0.4);
+      --error: #f87171;
+      --error-bg: rgba(248, 113, 113, 0.1);
+      
+      /* Syntax colors */
+      --syn-comment: #a8a8a8;
+      --syn-keyword: #c792ea;
+      --syn-string: #e8d87a;
+      --syn-number: #f78c6c;
+      --syn-function: #82aaff;
+      --syn-operator: #89ddff;
+      
+      /* Animation curves */
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-spring: cubic-bezier(0.5, 1.5, 0.5, 1);
+    }
+    
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 48px 24px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    /* ========== SECTION HEADER ========== */
+    .section-header {
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    
+    /* ========== EXERCISE ========== */
+    .exercise {
+      margin-bottom: 32px;
+    }
+    
+    .exercise-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    
+    .exercise-description {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    
+    /* ========== EDITOR CARD ========== */
+    .editor-card {
+      background: var(--surface);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+      transition: box-shadow 300ms var(--ease-out-expo), 
+                  transform 300ms var(--ease-out-expo);
+    }
+    
+    .editor-card:focus-within {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      transform: translateY(-2px);
+    }
+    
+    .editor-card.success {
+      box-shadow: 0 8px 40px var(--success-glow), 0 4px 24px rgba(0,0,0,0.12);
+    }
+    
+    /* ========== EDITOR HEADER ========== */
+    .editor-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-code);
+    }
+    
+    .editor-icon {
+      width: 28px;
+      height: 28px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--text-code-dim);
+      transition: all 300ms var(--ease-out-expo);
+    }
+    
+    .editor-icon.success {
+      background: var(--success);
+      color: #052e16;
+      transform: scale(1.1);
+    }
+    
+    .editor-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-code-dim);
+      letter-spacing: -0.01em;
+    }
+    
+    /* ========== CODE AREA ========== */
+    .code-area {
+      display: flex;
+      min-height: 200px;
+      position: relative;
+    }
+    
+    .line-numbers {
+      padding: 20px 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border-code);
+      user-select: none;
+      min-width: 52px;
+    }
+    
+    .line-number {
+      padding: 0 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text-code-dim);
+      text-align: right;
+      transition: color 100ms ease-out;
+    }
+    
+    .line-number.active {
+      color: var(--text-code);
+    }
+    
+    .editor-content {
+      flex: 1;
+      position: relative;
+      padding: 20px;
+      min-height: 200px;
+    }
+    
+    /* Hidden input */
+    .hidden-input {
+      position: absolute;
+      inset: 20px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: transparent;
+      caret-color: transparent;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.75;
+      resize: none;
+      z-index: 10;
+      padding: 0;
+    }
+    
+    .visual-layer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.75;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      pointer-events: none;
+      color: var(--text-code);
+    }
+    
+    /* SNAPPY: Character animation */
+    .char { display: inline; }
+    .char.new { animation: charIn 50ms linear forwards; }
+    @keyframes charIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .char.selected {
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+    }
+    
+    /* SNAPPY: Cursor */
+    .cursor {
+      position: absolute;
+      width: 2px;
+      height: 20px;
+      background: var(--text-code);
+      pointer-events: none;
+      z-index: 50;
+      border-radius: 1px;
+      left: 20px;
+      top: 20px;
+      transition: left 50ms linear, top 50ms linear;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      0%, 48% { opacity: 1; }
+      50%, 100% { opacity: 0.2; }
+    }
+    .cursor.active { animation: none; opacity: 1; }
+    
+    /* Syntax */
+    .syn-comment { color: var(--syn-comment); font-style: italic; }
+    .syn-keyword { color: var(--syn-keyword); }
+    .syn-string { color: var(--syn-string); }
+    .syn-number { color: var(--syn-number); }
+    .syn-function { color: var(--syn-function); }
+    .syn-operator { color: var(--syn-operator); }
+    
+    /* ========== OUTPUT PANEL ========== */
+    .output-panel {
+      background: var(--surface-elevated);
+      border-top: 1px solid var(--border-code);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 400ms var(--ease-out-expo);
+    }
+    
+    .output-panel.open {
+      grid-template-rows: 1fr;
+    }
+    
+    .output-inner {
+      overflow: hidden;
+    }
+    
+    .output-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border-code);
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity 250ms ease-out 100ms, transform 250ms var(--ease-out-expo) 100ms;
+    }
+    
+    .output-panel.open .output-header {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .output-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-code-dim);
+    }
+    
+    .output-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      transform: scale(0);
+      transition: transform 300ms var(--ease-out-back) 200ms;
+    }
+    
+    .output-panel.open .output-dot {
+      transform: scale(1);
+    }
+    
+    .output-dot.error {
+      background: var(--error);
+    }
+    
+    .output-content {
+      padding: 16px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--success);
+      min-height: 48px;
+    }
+    
+    .output-content.error {
+      color: var(--error);
+    }
+    
+    /* Typewriter effect for output */
+    .output-char {
+      opacity: 0;
+      animation: typeChar 30ms ease-out forwards;
+    }
+    
+    @keyframes typeChar {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    /* ========== EDITOR FOOTER ========== */
+    .editor-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--surface-elevated);
+      border-top: 1px solid var(--border-code);
+    }
+    
+    .editor-status {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-code-dim);
+    }
+    
+    /* ========== CHECK BUTTON ========== */
+    .btn-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 140px;
+      padding: 10px 20px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 250ms var(--ease-out-expo);
+    }
+    
+    .btn-check:hover:not(:disabled) {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+    
+    .btn-check:active:not(:disabled) {
+      transform: translateY(0) scale(0.97);
+      transition: transform 50ms linear;
+    }
+    
+    .btn-check:disabled {
+      cursor: wait;
+    }
+    
+    .btn-check.loading {
+      background: var(--accent);
+    }
+    
+    .btn-check.success {
+      background: var(--success);
+      box-shadow: 0 6px 20px var(--success-glow);
+    }
+    
+    .btn-text {
+      transition: opacity 150ms ease-out, transform 150ms ease-out;
+    }
+    
+    .btn-check.loading .btn-text,
+    .btn-check.success .btn-text {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    
+    /* Spinner */
+    .btn-spinner {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 150ms ease-out, transform 150ms var(--ease-out-back);
+    }
+    
+    .btn-check.loading .btn-spinner {
+      opacity: 1;
+      transform: scale(1);
+      animation: spin 600ms linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Checkmark */
+    .btn-checkmark {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 200ms ease-out, transform 300ms var(--ease-out-back);
+    }
+    
+    .btn-check.success .btn-checkmark {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .btn-checkmark svg {
+      stroke: white;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    
+    .btn-checkmark path {
+      stroke-dasharray: 24;
+      stroke-dashoffset: 24;
+      animation: none;
+    }
+    
+    .btn-check.success .btn-checkmark path {
+      animation: drawCheck 400ms var(--ease-out-expo) 100ms forwards;
+    }
+    
+    @keyframes drawCheck {
+      to { stroke-dashoffset: 0; }
+    }
+    
+    /* ========== FEEDBACK ========== */
+    .feedback {
+      margin-top: 20px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      opacity: 0;
+      transform: translateY(12px) scale(0.98);
+      pointer-events: none;
+      transition: opacity 300ms var(--ease-out-expo), 
+                  transform 400ms var(--ease-out-expo),
+                  background-color 300ms ease-out,
+                  border-color 300ms ease-out;
+    }
+    
+    .feedback.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    
+    .feedback.success {
+      background: var(--success-bg);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      color: #166534;
+    }
+    
+    .feedback.error {
+      background: var(--error-bg);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      color: #991b1b;
+    }
+    
+    .feedback-icon {
+      font-size: 20px;
+      line-height: 1;
+      transform: scale(0);
+      transition: transform 400ms var(--ease-out-back) 200ms;
+    }
+    
+    .feedback.show .feedback-icon {
+      transform: scale(1);
+    }
+    
+    .feedback-content {
+      flex: 1;
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: opacity 300ms ease-out 300ms, transform 300ms var(--ease-out-expo) 300ms;
+    }
+    
+    .feedback.show .feedback-content {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    .feedback-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    /* ========== HINT ========== */
+    .hint-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: all 200ms var(--ease-out-expo);
+    }
+    
+    .hint-btn:hover {
+      color: var(--text);
+      border-color: var(--text-secondary);
+      background: var(--bg-secondary);
+      transform: translateY(-1px);
+    }
+    
+    .hint-content {
+      margin-top: 12px;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition: grid-template-rows 300ms var(--ease-out-expo),
+                  opacity 300ms ease-out,
+                  margin-top 300ms var(--ease-out-expo);
+    }
+    
+    .hint-content.show {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+    
+    .hint-inner {
+      overflow: hidden;
+    }
+    
+    .hint-content code {
+      background: rgba(0,0,0,0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+    
+    /* ========== SUCCESS PARTICLES ========== */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+      overflow: hidden;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: particleFly 800ms var(--ease-out-expo) forwards;
+    }
+    
+    @keyframes particleFly {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="section-header">
+      <h1 class="section-title">The Exercise</h1>
+    </header>
+    
+    <section class="exercise">
+      <h2 class="exercise-title">Exercise 1.1: Hello, You</h2>
+      <p class="exercise-description">Modify the code to print your name instead.</p>
+      
+      <div class="editor-card" id="editor-card">
+        <div class="editor-header">
+          <div class="editor-icon" id="editor-icon">?</div>
+          <span class="editor-label">Exercise 1.1</span>
+        </div>
+        
+        <div class="code-area">
+          <div class="line-numbers" id="line-numbers"></div>
+          <div class="editor-content">
+            <textarea class="hidden-input" id="input" spellcheck="false"></textarea>
+            <div class="visual-layer" id="visual"></div>
+            <div class="cursor" id="cursor"></div>
+          </div>
+        </div>
+        
+        <div class="output-panel" id="output-panel">
+          <div class="output-inner">
+            <div class="output-header">
+              <div class="output-title">
+                <span class="output-dot" id="output-dot"></span>
+                <span>Output</span>
+              </div>
+            </div>
+            <div class="output-content" id="output-content"></div>
+          </div>
+        </div>
+        
+        <div class="editor-footer">
+          <div class="editor-status">
+            <span id="cursor-pos">Ln 1, Col 1</span>
+          </div>
+          <button class="btn-check" id="btn-check" onclick="checkAnswer()">
+            <span class="btn-text">Check Answer</span>
+            <span class="btn-spinner"></span>
+            <span class="btn-checkmark">
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path d="M4 12l6 6L20 6"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="feedback" id="feedback">
+        <span class="feedback-icon" id="feedback-icon"></span>
+        <div class="feedback-content">
+          <div class="feedback-title" id="feedback-title"></div>
+          <div class="feedback-message" id="feedback-message"></div>
+        </div>
+      </div>
+      
+      <button class="hint-btn" onclick="toggleHint()">
+        <span>💡</span>
+        <span>Need a hint?</span>
+      </button>
+      
+      <div class="hint-content" id="hint-content">
+        <div class="hint-inner">
+          Replace <code>"Hello"</code> with your name in quotes, like <code>"Hello, Wil!"</code> or <code>"My name is Wil"</code>.
+        </div>
+      </div>
+    </section>
+  </div>
+  
+  <div class="particles" id="particles"></div>
+
+  <script>
+    const input = document.getElementById('input');
+    const visual = document.getElementById('visual');
+    const cursor = document.getElementById('cursor');
+    const lineNumbers = document.getElementById('line-numbers');
+    const cursorPosEl = document.getElementById('cursor-pos');
+    const outputPanel = document.getElementById('output-panel');
+    const outputContent = document.getElementById('output-content');
+    const outputDot = document.getElementById('output-dot');
+    const feedback = document.getElementById('feedback');
+    const feedbackIcon = document.getElementById('feedback-icon');
+    const feedbackTitle = document.getElementById('feedback-title');
+    const feedbackMessage = document.getElementById('feedback-message');
+    const btnCheck = document.getElementById('btn-check');
+    const editorCard = document.getElementById('editor-card');
+    const editorIcon = document.getElementById('editor-icon');
+    const particles = document.getElementById('particles');
+    
+    let lastText = '';
+    let typingTimer = null;
+    let isChecking = false;
+    
+    const initialCode = `# Print a greeting with your name below
+print("Hello")`;
+    
+    // Measure text
+    const measure = document.createElement('span');
+    measure.style.cssText = 'position:absolute;visibility:hidden;font:14px "JetBrains Mono",monospace;white-space:pre';
+    document.body.appendChild(measure);
+    
+    function measureText(t) {
+      measure.textContent = t;
+      return measure.getBoundingClientRect().width;
+    }
+    
+    // Tokenizer
+    const keywords = ['def', 'class', 'if', 'else', 'elif', 'for', 'while', 'return', 'import', 'from', 'as', 'try', 'except', 'with', 'lambda', 'True', 'False', 'None', 'and', 'or', 'not', 'in', 'is', 'pass', 'break', 'continue'];
+    const builtins = ['print', 'len', 'range', 'str', 'int', 'float', 'list', 'dict', 'set', 'open', 'input', 'type', 'sum', 'max', 'min'];
+    
+    function tokenize(text) {
+      const tokens = [];
+      let i = 0;
+      while (i < text.length) {
+        const char = text[i];
+        if (char === '#') {
+          let end = text.indexOf('\n', i);
+          if (end === -1) end = text.length;
+          tokens.push({ type: 'comment', value: text.slice(i, end) });
+          i = end;
+          continue;
+        }
+        if (char === '"' || char === "'") {
+          const quote = char;
+          let j = i + 1;
+          while (j < text.length && text[j] !== quote) {
+            if (text[j] === '\\') j++;
+            j++;
+          }
+          tokens.push({ type: 'string', value: text.slice(i, j + 1) });
+          i = j + 1;
+          continue;
+        }
+        if (/\d/.test(char)) {
+          let j = i;
+          while (j < text.length && /[\d.]/.test(text[j])) j++;
+          tokens.push({ type: 'number', value: text.slice(i, j) });
+          i = j;
+          continue;
+        }
+        if (/[a-zA-Z_]/.test(char)) {
+          let j = i;
+          while (j < text.length && /[a-zA-Z0-9_]/.test(text[j])) j++;
+          const word = text.slice(i, j);
+          let type = 'text';
+          if (keywords.includes(word)) type = 'keyword';
+          else if (builtins.includes(word)) type = 'function';
+          tokens.push({ type, value: word });
+          i = j;
+          continue;
+        }
+        if ('+-*/%=<>!&|^~@():[]{},.'.includes(char)) {
+          tokens.push({ type: 'operator', value: char });
+          i++;
+          continue;
+        }
+        tokens.push({ type: 'text', value: char });
+        i++;
+      }
+      return tokens;
+    }
+    
+    function render() {
+      const text = input.value;
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const existingLen = lastText.length;
+      const tokens = tokenize(text);
+      
+      let html = '';
+      let charIndex = 0;
+      
+      for (const token of tokens) {
+        const synClass = {
+          'keyword': 'syn-keyword',
+          'function': 'syn-function',
+          'string': 'syn-string',
+          'number': 'syn-number',
+          'comment': 'syn-comment',
+          'operator': 'syn-operator'
+        }[token.type] || '';
+        
+        for (const char of token.value) {
+          const isNew = charIndex >= existingLen && text.length > lastText.length;
+          const isSelected = charIndex >= start && charIndex < end && start !== end;
+          
+          let classes = 'char';
+          if (isNew && char !== ' ' && char !== '\n') classes += ' new';
+          if (isSelected) classes += ' selected';
+          if (synClass) classes += ' ' + synClass;
+          
+          if (char === '\n') {
+            html += '\n';
+          } else if (char === '<') {
+            html += `<span class="${classes}">&lt;</span>`;
+          } else if (char === '>') {
+            html += `<span class="${classes}">&gt;</span>`;
+          } else if (char === '&') {
+            html += `<span class="${classes}">&amp;</span>`;
+          } else {
+            html += `<span class="${classes}">${char}</span>`;
+          }
+          charIndex++;
+        }
+      }
+      
+      visual.innerHTML = html;
+      lastText = text;
+      updateLineNumbers();
+      updateCursor();
+    }
+    
+    function updateLineNumbers() {
+      const lines = input.value.split('\n');
+      const currentLine = getCurrentLine();
+      let html = '';
+      for (let i = 0; i < Math.max(lines.length, 5); i++) {
+        const isActive = i === currentLine;
+        html += `<div class="line-number${isActive ? ' active' : ''}">${i + 1}</div>`;
+      }
+      lineNumbers.innerHTML = html;
+    }
+    
+    function getCurrentLine() {
+      const text = input.value;
+      const pos = input.selectionStart;
+      return text.substring(0, pos).split('\n').length - 1;
+    }
+    
+    function updateCursor() {
+      const text = input.value;
+      const pos = input.selectionStart;
+      const before = text.substring(0, pos);
+      const lines = before.split('\n');
+      const line = lines.length - 1;
+      const col = lines[lines.length - 1].length;
+      const lineHeight = 14 * 1.75;
+      const x = measureText(lines[lines.length - 1]);
+      const y = line * lineHeight;
+      cursor.style.left = (20 + x) + 'px';
+      cursor.style.top = (20 + y) + 'px';
+      cursorPosEl.textContent = `Ln ${line + 1}, Col ${col + 1}`;
+      cursor.classList.add('active');
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(() => cursor.classList.remove('active'), 400);
+    }
+    
+    // Typewriter effect for output
+    function typeOutput(text, element, isError = false) {
+      element.innerHTML = '';
+      element.classList.toggle('error', isError);
+      
+      let i = 0;
+      const chars = text.split('');
+      
+      function typeNext() {
+        if (i < chars.length) {
+          const span = document.createElement('span');
+          span.className = 'output-char';
+          span.textContent = chars[i];
+          span.style.animationDelay = `${i * 15}ms`;
+          element.appendChild(span);
+          i++;
+          requestAnimationFrame(typeNext);
+        }
+      }
+      
+      typeNext();
+    }
+    
+    // Create success particles
+    function createParticles(x, y) {
+      const colors = ['#4ade80', '#22c55e', '#86efac', '#bbf7d0', '#3d5a80'];
+      
+      for (let i = 0; i < 12; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        
+        const angle = (i / 12) * Math.PI * 2;
+        const distance = 60 + Math.random() * 40;
+        particle.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
+        
+        particles.appendChild(particle);
+        
+        setTimeout(() => particle.remove(), 800);
+      }
+    }
+    
+    // Check answer with choreographed animation
+    async function checkAnswer() {
+      if (isChecking) return;
+      isChecking = true;
+      
+      const code = input.value;
+      
+      // Reset states
+      feedback.classList.remove('show', 'success', 'error');
+      editorCard.classList.remove('success');
+      editorIcon.classList.remove('success');
+      editorIcon.textContent = '?';
+      outputPanel.classList.remove('open');
+      outputDot.classList.remove('error');
+      
+      // 1. Button loading state
+      btnCheck.disabled = true;
+      btnCheck.classList.add('loading');
+      btnCheck.classList.remove('success');
+      
+      // 2. Wait (simulates checking)
+      await sleep(600);
+      
+      // 3. Parse result
+      const printMatch = code.match(/print\s*\(\s*["'](.*)["']\s*\)/);
+      const isSuccess = printMatch && printMatch[1].toLowerCase() !== 'hello' && printMatch[1].length > 0;
+      const printed = printMatch ? printMatch[1] : null;
+      
+      // 4. Button success/reset state
+      btnCheck.classList.remove('loading');
+      
+      if (isSuccess) {
+        btnCheck.classList.add('success');
+        
+        // Get button position for particles
+        const rect = btnCheck.getBoundingClientRect();
+        createParticles(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      }
+      
+      await sleep(200);
+      
+      // 5. Open output panel
+      outputPanel.classList.add('open');
+      
+      await sleep(150);
+      
+      // 6. Type out result
+      if (printMatch) {
+        typeOutput(printed, outputContent, false);
+      } else {
+        outputDot.classList.add('error');
+        typeOutput('Error: Could not find a valid print statement.', outputContent, true);
+      }
+      
+      await sleep(300);
+      
+      // 7. Show feedback
+      if (isSuccess) {
+        editorCard.classList.add('success');
+        editorIcon.classList.add('success');
+        editorIcon.textContent = '✓';
+        
+        feedback.classList.remove('error');
+        feedback.classList.add('success');
+        feedbackIcon.textContent = '✓';
+        feedbackTitle.textContent = 'Correct!';
+        feedbackMessage.textContent = `Great job! You modified the code to print "${printed}".`;
+      } else if (printMatch) {
+        feedback.classList.remove('success');
+        feedback.classList.add('error');
+        feedbackIcon.textContent = '✗';
+        feedbackTitle.textContent = 'Not quite';
+        feedbackMessage.textContent = 'Try changing "Hello" to include your name.';
+      } else {
+        feedback.classList.remove('success');
+        feedback.classList.add('error');
+        feedbackIcon.textContent = '✗';
+        feedbackTitle.textContent = 'Syntax Error';
+        feedbackMessage.textContent = 'Make sure you have a print() statement with text in quotes.';
+      }
+      
+      feedback.classList.add('show');
+      
+      // 8. Reset button after delay
+      await sleep(1500);
+      btnCheck.disabled = false;
+      if (isSuccess) {
+        // Keep success state a bit longer
+        await sleep(1000);
+      }
+      btnCheck.classList.remove('success');
+      isChecking = false;
+    }
+    
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    function toggleHint() {
+      const hint = document.getElementById('hint-content');
+      hint.classList.toggle('show');
+    }
+    
+    // Events
+    input.addEventListener('input', render);
+    input.addEventListener('keydown', (e) => {
+      requestAnimationFrame(updateCursor);
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        input.value = input.value.substring(0, start) + '    ' + input.value.substring(end);
+        input.selectionStart = input.selectionEnd = start + 4;
+        render();
+      }
+    });
+    input.addEventListener('click', () => { updateCursor(); render(); });
+    input.addEventListener('select', render);
+    document.addEventListener('selectionchange', () => {
+      if (document.activeElement === input) render();
+    });
+    
+    document.querySelector('.editor-card').addEventListener('click', (e) => {
+      if (!e.target.closest('button')) {
+        input.focus();
+      }
+    });
+    
+    // Init
+    input.value = initialCode;
+    render();
+    input.focus();
+    input.selectionStart = input.selectionEnd = initialCode.length;
+    updateCursor();
+  </script>
+</body>
+</html>

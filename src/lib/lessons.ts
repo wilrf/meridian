@@ -24,6 +24,7 @@ export interface Lesson {
 interface ManifestLesson {
   id: string
   title: string
+  isProject?: boolean
 }
 
 interface ManifestPhase {
@@ -188,12 +189,18 @@ export function getLesson(slugParts: string[]): Lesson | null {
   return null
 }
 
+interface AdjacentLesson {
+  slug: string
+  title: string
+  isProject?: boolean
+}
+
 /**
  * Get adjacent lessons for navigation
  */
 export function getAdjacentLessons(
   currentSlug: string
-): { prev: { slug: string; title: string } | null; next: { slug: string; title: string } | null } {
+): { prev: AdjacentLesson | null; next: AdjacentLesson | null } {
   // Import manifest dynamically to avoid circular dependencies
   let manifest: unknown
   try {
@@ -209,8 +216,8 @@ export function getAdjacentLessons(
     return { prev: null, next: null }
   }
 
-  let prev: { slug: string; title: string } | null = null
-  let next: { slug: string; title: string } | null = null
+  let prev: AdjacentLesson | null = null
+  let next: AdjacentLesson | null = null
 
   // Flatten all lessons across phases
   const allLessons: ManifestLesson[] = []
@@ -224,14 +231,22 @@ export function getAdjacentLessons(
   if (currentIndex > 0) {
     const prevLesson = allLessons[currentIndex - 1]
     if (prevLesson) {
-      prev = { slug: prevLesson.id, title: prevLesson.title }
+      prev = {
+        slug: prevLesson.id,
+        title: prevLesson.title,
+        isProject: prevLesson.isProject,
+      }
     }
   }
 
   if (currentIndex >= 0 && currentIndex < allLessons.length - 1) {
     const nextLesson = allLessons[currentIndex + 1]
     if (nextLesson) {
-      next = { slug: nextLesson.id, title: nextLesson.title }
+      next = {
+        slug: nextLesson.id,
+        title: nextLesson.title,
+        isProject: nextLesson.isProject,
+      }
     }
   }
 

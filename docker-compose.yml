@@ -1,0 +1,62 @@
+# Docker Compose for Meridian Testing Sandbox
+# Provides isolated environment for dynamic testing
+
+services:
+  # Main Next.js application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - "3002:3000"
+    volumes:
+      # Mount source for hot reload
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Playwright container for browser testing
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.48.0-focal
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - ./test-results:/app/test-results
+      - ./test-screenshots:/app/test-screenshots
+    working_dir: /app
+    environment:
+      - BASE_URL=http://app:3000
+    command: [ "tail", "-f", "/dev/null" ] # Keep container running for interactive use
+    profiles:
+      - testing
+
+  # API testing and load testing container
+  tester:
+    image: node:20-alpine
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - ./scripts:/scripts
+    working_dir: /app
+    environment:
+      - APP_URL=http://app:3000
+    command: [ "tail", "-f", "/dev/null" ] # Keep running for interactive commands
+    profiles:
+      - testing
+
+volumes:
+  node_modules:

@@ -19,7 +19,54 @@ interface LightEditorProps {
   ariaLabel?: string
 }
 
-const LINE_HEIGHT = 24 // 14px * 1.75 line-height
+interface FontMetrics {
+  charWidth: number
+  lineHeight: number
+}
+
+/**
+ * Hook to measure font metrics dynamically (like Monaco/CodeMirror).
+ * Creates a hidden measuring element to get the actual rendered character width
+ * and line height from the browser's font rendering engine.
+ */
+function useFontMetrics(containerRef: React.RefObject<HTMLElement | null>): FontMetrics {
+  const [metrics, setMetrics] = useState<FontMetrics>({ charWidth: 8.4, lineHeight: 24.5 })
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    // Create a hidden measuring element with the same font styles as the editor
+    const measurer = document.createElement('span')
+    measurer.style.cssText = `
+      position: absolute;
+      visibility: hidden;
+      white-space: pre;
+      font-family: var(--font-mono), 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 14px;
+      line-height: 1.75;
+    `
+    // Use a series of characters to get accurate average width
+    // For monospace fonts, all characters should be the same width
+    measurer.textContent = 'X'.repeat(100)
+    container.appendChild(measurer)
+
+    // Measure the actual rendered dimensions
+    const rect = measurer.getBoundingClientRect()
+    const charWidth = rect.width / 100
+    const lineHeight = rect.height
+
+    // Clean up
+    container.removeChild(measurer)
+
+    // Only update if values are reasonable (prevents flash of wrong values)
+    if (charWidth > 0 && lineHeight > 0) {
+      setMetrics({ charWidth, lineHeight })
+    }
+  }, [containerRef])
+
+  return metrics
+}
 
 function LightEditorInner({
   value,
@@ -45,17 +92,11 @@ function LightEditorInner({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const visualRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const measurerRef = useRef<HTMLSpanElement>(null)
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onRunRef = useRef(onRun)
 
-  // Measure text width using a span inside the editor (same font context)
-  const measureText = useCallback((text: string): number => {
-    const measurer = measurerRef.current
-    if (!measurer) return 0
-    measurer.textContent = text
-    return measurer.getBoundingClientRect().width
-  }, [])
+  // Measure font metrics dynamically (like Monaco/CodeMirror)
+  const fontMetrics = useFontMetrics(containerRef)
 
   // Keep onRun ref current
   useEffect(() => {
@@ -96,13 +137,11 @@ function LightEditorInner({
 
     const text = textarea.value
     const pos = textarea.selectionStart
-    const { line } = getCursorInfo(text, pos)
+    const { line, col } = getCursorInfo(text, pos)
 
-    // Measure text width for accurate positioning
-    const lines = text.substring(0, pos).split('\n')
-    const currentLineText = lines[lines.length - 1] ?? ''
-    const x = measureText(currentLineText)
-    const y = line * LINE_HEIGHT
+    // Calculate pixel positions using measured font metrics (like Monaco/CodeMirror)
+    const x = col * fontMetrics.charWidth
+    const y = line * fontMetrics.lineHeight
 
     setCursorPosition({ x, y })
 
@@ -122,8 +161,8 @@ function LightEditorInner({
       setAutocompleteState({
         visible: true,
         word,
-        left: x + 52, // 52px for line numbers column
-        top: y + LINE_HEIGHT + 4,
+        left: col * fontMetrics.charWidth,
+        top: y + fontMetrics.lineHeight + 4,
         startIndex,
       })
     } else {
@@ -134,7 +173,7 @@ function LightEditorInner({
     setIsTyping(true)
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
     typingTimerRef.current = setTimeout(() => setIsTyping(false), 400)
-  }, [getCursorInfo, getCurrentWord, readOnly, measureText])
+  }, [getCursorInfo, getCurrentWord, readOnly, fontMetrics])
 
   // Handle input change
   const handleInput = useCallback(() => {
@@ -324,13 +363,6 @@ function LightEditorInner({
 
       {/* Editor content */}
       <div className="light-editor-content">
-        {/* Hidden span for text measurement (inherits editor font) */}
-        <span
-          ref={measurerRef}
-          className="light-editor-measurer"
-          aria-hidden="true"
-        />
-
         {/* Hidden textarea for input */}
         <textarea
           ref={textareaRef}
@@ -354,22 +386,21 @@ function LightEditorInner({
         {/* Visual layer with syntax highlighting */}
         <div ref={visualRef} className="light-editor-visual" aria-hidden="true">
           {renderedTokens}
+          {/* Cursor - inside visual layer so it inherits same positioning */}
+          <div
+            className={`light-editor-cursor ${isTyping ? 'active' : ''}`}
+            style={{
+              left: `${cursorPosition.x}px`,
+              top: `${cursorPosition.y}px`,
+              height: `${fontMetrics.lineHeight}px`,
+            }}
+          />
         </div>
-
-        {/* Cursor */}
-        <div
-          className={`light-editor-cursor ${isTyping ? 'active' : ''}`}
-          style={{
-            left: `${cursorPosition.x}px`,
-            top: `${cursorPosition.y}px`,
-          }}
-          aria-hidden="true"
-        />
 
         {/* Autocomplete dropdown */}
         <Autocomplete
           word={autocompleteState.word}
-          left={autocompleteState.left - 52} // Relative to content, not editor
+          left={autocompleteState.left}
           top={autocompleteState.top}
           onSelect={handleAutocompleteSelect}
           onDismiss={handleAutocompleteDismiss}
