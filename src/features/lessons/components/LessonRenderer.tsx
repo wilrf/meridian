@@ -2,18 +2,18 @@
 
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { remarkCodeMeta } from '@/lib/remark-code-meta'
+import { remarkCodeMeta } from '@/features/lessons/lib/remark-code-meta'
 import rehypeHighlight from 'rehype-highlight'
-import { rehypeCodeBlocks } from '@/lib/rehype-code-blocks'
+import { rehypeCodeBlocks } from '@/features/lessons/lib/rehype-code-blocks'
 import type { Components } from 'react-markdown'
 import dynamic from 'next/dynamic'
-import ErrorBoundary from './ErrorBoundary'
-import { LessonProvider } from '@/lib/lesson-context'
+import { ErrorBoundary } from '@/shared/ui'
+import { LessonProvider } from '@/features/lessons/lib/lesson-context'
 import React, { ReactNode, useEffect, useRef } from 'react'
-import { usePyodide } from '@/lib/pyodide-context'
+import { usePyodide } from '@/features/editor/lib/pyodide-context'
 
 // Dynamic import CodeRunner to avoid SSR issues
-const CodeRunner = dynamic(() => import('./CodeRunner'), {
+const CodeRunner = dynamic(() => import('@/features/editor/components/CodeRunner'), {
   ssr: false,
   loading: () => (
     <div className="my-4 h-48 bg-[var(--bg-subtle)] animate-pulse rounded-xl" />
@@ -21,7 +21,7 @@ const CodeRunner = dynamic(() => import('./CodeRunner'), {
 })
 
 // Dynamic import StaticCode for consistent Python highlighting
-const StaticCode = dynamic(() => import('./StaticCode'), {
+const StaticCode = dynamic(() => import('@/features/editor/components/StaticCode'), {
   ssr: false,
   loading: () => (
     <div className="my-4 h-24 bg-[var(--bg-subtle)] animate-pulse rounded-xl" />
@@ -90,23 +90,23 @@ const Blockquote = ({ children }: { children: ReactNode }) => {
     if (childrenArray.length === 0) return null
 
     const firstChild = childrenArray[0]
-    
+
     // Check if first child is a paragraph (common in markdown)
     if (React.isValidElement(firstChild) && firstChild.type === 'p') {
       const pChildren = React.Children.toArray(firstChild.props.children)
       if (pChildren.length > 0 && typeof pChildren[0] === 'string') {
         const text = pChildren[0]
         const match = text.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]/i)
-        
+
         if (match && match[1]) {
           const type = match[1].toUpperCase()
           // Remove the marker from the text
           const newText = text.replace(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s?/i, '')
-          
+
           // Reconstruct the paragraph without the marker
           const newPChildren = [newText, ...pChildren.slice(1)]
           const newFirstChild = React.cloneElement(firstChild as React.ReactElement, {}, newPChildren)
-          
+
           return {
             type,
             content: [newFirstChild, ...childrenArray.slice(1)]
@@ -114,7 +114,7 @@ const Blockquote = ({ children }: { children: ReactNode }) => {
         }
       }
     }
-    
+
     return null
   }
 

@@ -2,9 +2,9 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { useProgress } from '@/lib/use-progress'
+import { useProgress } from '@/features/progress/hooks/use-progress'
 import manifest from '@/content/manifest.json'
-import StatsBar from './StatsBar'
+import StatsBar from '@/features/navigation/components/StatsBar'
 import MeridianLogo from '@/components/MeridianLogo'
 
 interface Lesson {

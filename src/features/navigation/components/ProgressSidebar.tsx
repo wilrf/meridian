@@ -3,9 +3,9 @@
 import { memo, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useProgress } from '@/lib/use-progress'
+import { useProgress } from '@/features/progress/hooks/use-progress'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import AuthButton from '@/components/AuthButton'
+import AuthButton from '@/features/auth/components/AuthButton'
 import MeridianLogo from '@/components/MeridianLogo'
 import manifest from '@/content/manifest.json'
 

@@ -1,9 +1,13 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { usePyodide } from '@/lib/pyodide-context'
-import { useProgress } from '@/lib/use-progress'
-import ResizableDivider from './ResizableDivider'
+// Editor feature - import from specific context to avoid bundling pyodide provider in client
+import { usePyodide } from '@/features/editor/lib/pyodide-context'
+// Progress feature - import directly from hook to avoid bundling server-only progress.ts
+import { useProgress } from '@/features/progress/hooks/use-progress'
+// Shared UI has been migrated - using public API
+import { ResizableDivider } from '@/shared/ui'
+// Internal project feature imports
 import ProjectInstructions from './ProjectInstructions'
 import ProjectEditor, { type ProjectFile } from './ProjectEditor'
 import ProjectOutput from './ProjectOutput'

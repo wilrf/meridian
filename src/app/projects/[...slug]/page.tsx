@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
-import { getLesson } from '@/lib/lessons'
-import ProjectWorkspace from '@/components/ProjectWorkspace'
-import PyodidePreloader from '@/components/PyodidePreloader'
-import ErrorBoundary from '@/components/ErrorBoundary'
+import { getLesson } from '@/features/lessons'
+import { ProjectWorkspace } from '@/features/projects'
+import { PyodidePreloader } from '@/features/editor'
+import { ErrorBoundary } from '@/shared/ui'
 import manifest from '@/content/manifest.json'
 
 interface PageProps {

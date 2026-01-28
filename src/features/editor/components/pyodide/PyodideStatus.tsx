@@ -1,6 +1,6 @@
 'use client'
 
-import { usePyodide } from '@/lib/pyodide-context'
+import { usePyodide } from '@/features/editor/lib/pyodide-context'
 
 export default function PyodideStatus() {
   const { state } = usePyodide()

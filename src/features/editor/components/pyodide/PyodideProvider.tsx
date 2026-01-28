@@ -1,6 +1,6 @@
 'use client'
 
-import { PyodideProvider as Provider } from '@/lib/pyodide-context'
+import { PyodideProvider as Provider } from '@/features/editor/lib/pyodide-context'
 import type { ReactNode } from 'react'
 
 interface PyodideProviderProps {

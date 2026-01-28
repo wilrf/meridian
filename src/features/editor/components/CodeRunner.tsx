@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { usePyodide } from '@/lib/pyodide-context'
-import { useLessonContext } from '@/lib/lesson-context'
+import { usePyodide } from '@/features/editor/lib/pyodide-context'
+// Import directly from context file to avoid bundling server-only lessons.ts
+import { useLessonContext } from '@/features/lessons/lib/lesson-context'
 import HintSystem from './HintSystem'
 import LightEditor from './LightEditor'
 

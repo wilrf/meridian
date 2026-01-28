@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
-import type { ProgressData } from './progress'
+import type { ProgressData } from '@/features/progress/lib/progress'
 
 const DEFAULT_PROGRESS: ProgressData = {
   lastUpdated: null,
@@ -32,8 +32,11 @@ function isValidProgressData(data: unknown): data is ProgressData {
 export async function fetchCloudProgress(): Promise<ProgressData | null> {
   const supabase = createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  // Use getSession() instead of getUser() to avoid AuthSessionMissingError
+  // when not logged in. getSession() returns null gracefully.
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.user) return null
+  const user = session.user
 
   const { data, error } = await supabase
     .from('user_progress')
@@ -65,8 +68,10 @@ export async function fetchCloudProgress(): Promise<ProgressData | null> {
 export async function saveCloudProgress(progress: ProgressData): Promise<boolean> {
   const supabase = createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return false
+  // Use getSession() instead of getUser() to avoid AuthSessionMissingError
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.user) return false
+  const user = session.user
 
   const progressWithTimestamp = {
     ...progress,

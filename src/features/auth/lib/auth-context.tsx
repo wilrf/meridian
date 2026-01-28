@@ -24,47 +24,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = createClient()
 
-    // Get initial user (getUser validates with server, getSession only reads local storage)
-    supabase.auth.getUser()
-      .then(({ data: { user }, error }) => {
-        if (error) {
-          console.error('Error getting user:', error)
-          setUser(null)
-          setSession(null)
-          setError('Failed to verify authentication. Please try refreshing the page.')
-        } else {
-          setUser(user)
-          setError(null)
-          // Also get session for token access
-          return supabase.auth.getSession()
-        }
-      })
-      .then((result) => {
-        if (result) {
-          setSession(result.data.session)
-        }
-      })
-      .catch((error) => {
-        console.error('Error initializing auth:', error)
-        setUser(null)
-        setSession(null)
-        setError('Failed to initialize authentication. Please try refreshing the page.')
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    // Suppress AuthSessionMissingError - it's expected when not logged in
+    // but Supabase logs it internally before we can catch it
+    const originalError = console.error
+    console.error = (...args: unknown[]) => {
+      const message = args[0]
+      if (
+        typeof message === 'string' &&
+        message.includes('AuthSessionMissingError')
+      ) {
+        return // Suppress this specific error
+      }
+      originalError.apply(console, args)
+    }
 
-    // Listen for auth changes
+    // Get initial session explicitly (don't rely solely on onAuthStateChange)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setUser(session?.user ?? null)
+      setLoading(false)
+    }).catch(() => {
+      // Even on error, stop showing loading state
+      setLoading(false)
+    }).finally(() => {
+      console.error = originalError
+    })
+
+    // Subscribe to future auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
-      setError(null) // Clear any previous auth errors on successful state change
-      setLoading(false)
+      setError(null)
+      // Don't set loading here since initial load is handled above
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      console.error = originalError // Ensure restoration on cleanup
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signInWithGithub = useCallback(async () => {

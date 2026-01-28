@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { memo, useRef, useState, useEffect, ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -7,8 +8,8 @@ import type { Components } from 'react-markdown'
 import React from 'react'
 import dynamic from 'next/dynamic'
 
-// Dynamic import StaticCode for consistent Python highlighting
-const StaticCode = dynamic(() => import('./StaticCode'), {
+// Dynamic import StaticCode from editor feature for consistent Python highlighting
+const StaticCode = dynamic(() => import('@/features/editor').then(mod => ({ default: mod.StaticCode })), {
   ssr: false,
   loading: () => (
     <div className="my-4 h-24 bg-[var(--bg-subtle)] animate-pulse rounded-xl" />
@@ -288,6 +289,16 @@ function ProjectInstructionsComponent({
         ref={containerRef}
         className="project-instructions-content"
       >
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-xs font-medium text-[var(--text-tertiary)] hover:text-accent transition-colors mb-6 group w-fit"
+        >
+          <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Dashboard
+        </Link>
+
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={instructionComponents}

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useCallback, memo } from 'react'
-import LightEditor from './LightEditor'
+// Editor feature has been migrated - using public API
+import { LightEditor } from '@/features/editor'
 
 export interface ProjectFile {
   id: string

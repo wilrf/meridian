@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef, useMemo, memo } from 'react'
-import { tokenize, getTokenClass, type Token } from '@/lib/python-tokenizer'
+import { tokenize, getTokenClass } from '@/features/editor/lib/python-tokenizer'
 import { Autocomplete } from './Autocomplete'
 
 interface LightEditorProps {
@@ -181,14 +181,23 @@ function LightEditorInner({
     if (!textarea || readOnly) return
 
     const newValue = textarea.value
+
+    // Track whether value changed (callback runs synchronously)
+    let valueChanged = false
     setLastText(prev => {
-      // Only update lastText if content actually changed
       if (prev !== newValue) {
-        onChange?.(newValue)
+        valueChanged = true
         return newValue
       }
       return prev
     })
+
+    // Notify parent AFTER state setter, not inside it
+    // (calling onChange inside setLastText callback causes "setState during render" error)
+    if (valueChanged) {
+      onChange?.(newValue)
+    }
+
     updateCursor()
   }, [onChange, updateCursor, readOnly])
 

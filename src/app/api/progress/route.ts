@@ -5,7 +5,7 @@ import {
   completeExercise,
   completeLesson,
   type LessonProgress,
-} from '@/lib/progress'
+} from '@/features/progress/lib/progress'
 
 // GET /api/progress - Read all progress or specific lesson
 export async function GET(request: NextRequest) {

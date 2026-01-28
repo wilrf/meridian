@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useAuth } from '@/lib/auth-context'
+import { useAuth } from '@/features/auth/lib/auth-context'
 
 export default function AuthButton() {
   const { user, loading, signInWithGithub, signOut } = useAuth()

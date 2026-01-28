@@ -8,6 +8,8 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/content/**/*.{md,mdx}",
     "./src/lib/**/*.{js,ts,jsx,tsx}",
+    "./src/features/**/*.{js,ts,jsx,tsx}",
+    "./src/shared/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {

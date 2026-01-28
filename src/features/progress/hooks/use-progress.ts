@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import type { ProgressData, LessonProgress } from './progress'
-import { useAuth } from './auth-context'
-import { fetchCloudProgress, saveCloudProgress, mergeProgress } from './cloud-progress'
+import type { ProgressData, LessonProgress } from '@/features/progress/lib/progress'
+import { useAuth } from '@/features/auth/lib/auth-context'
+import { fetchCloudProgress, saveCloudProgress, mergeProgress } from '@/features/progress/lib/cloud-progress'
 
 interface UseProgressResult {
   progress: ProgressData | null

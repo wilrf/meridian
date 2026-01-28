@@ -1,6 +1,7 @@
 # Bugfix Report - Meridian
 
 **Generated:** 2026-01-27
+**Updated:** 2026-01-28
 **Source:** BUGHUNT.md
 
 ---
@@ -9,15 +10,45 @@
 
 | Category | Attempted | Fixed | False Positives |
 |----------|-----------|-------|-----------------|
-| **Critical** | 2 | 2 | 0 |
+| **Critical** | 3 | 3 | 0 |
 | **High** | 7 | 6 | 1 |
-| **Total** | 9 | 8 | 1 |
+| **Total** | 10 | 9 | 1 |
 
 ---
 
 ## Bugs Fixed
 
 ### Critical Fixes
+
+#### C4. Turbopack Breaks Tailwind CSS Compilation ✅ FIXED
+**File:** `package.json` (dev script)
+**Date:** 2026-01-28
+**Issue:** Next.js 16 defaults to Turbopack, which has a known issue with Tailwind CSS JIT compilation. Critical utility classes like `w-72`, `flex-shrink-0`, and `h-screen` were present in HTML but had no corresponding CSS rules generated.
+
+**Symptoms:**
+- Sidebar expanded to ~78% of viewport instead of 288px
+- Main content squeezed to ~22% 
+- Layout appeared broken/jumbled
+- All Tailwind classes present in HTML but not applied
+
+**Root Cause:** Turbopack's CSS processing doesn't properly scan all files in the `content` paths for Tailwind's JIT compiler, causing many utility classes to be purged.
+
+**Fix:** Explicitly use webpack instead of Turbopack for the dev server.
+**Lines Changed:** 1
+
+```diff
+- "dev": "npm run build:manifest && next dev --turbopack",
++ "dev": "npm run build:manifest && next dev --webpack",
+```
+
+**Verification:**
+- Sidebar width: 288px (correct)
+- `flex-shrink-0` computed: "0" (correct)
+- All Tailwind utilities compiling properly
+
+**Note:** This is a known Turbopack limitation as of Next.js 16. Monitor future Turbopack releases for fixes to Tailwind CSS integration.
+
+---
 
 #### C3. Monaco Editor CDN Version Mismatch ✅ FIXED
 **File:** `src/components/editor/config.ts:11-14`

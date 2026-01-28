@@ -1,9 +1,7 @@
 import { notFound } from 'next/navigation'
-import { getLesson, getAllLessonSlugs, getAdjacentLessons } from '@/lib/lessons'
-import LessonRenderer from '@/components/LessonRenderer'
-import LessonNav from '@/components/LessonNav'
-import PyodidePreloader from '@/components/PyodidePreloader'
-import ErrorBoundary from '@/components/ErrorBoundary'
+import { getLesson, getAllLessonSlugs, getAdjacentLessons, LessonRenderer, LessonNav } from '@/features/lessons'
+import { PyodidePreloader } from '@/features/editor'
+import { ErrorBoundary } from '@/shared/ui'
 
 interface PageProps {
   params: Promise<{ slug: string[] }>

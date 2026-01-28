@@ -1,12 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import ProgressSidebar from "@/components/ProgressSidebar";
-import PyodideProvider from "@/components/PyodideProvider";
-import PyodideStatus from "@/components/PyodideStatus";
-import { ThemeProvider } from "@/lib/theme-context";
-import { AuthProvider } from "@/lib/auth-context";
-import ErrorBoundary from "@/components/ErrorBoundary";
+import { ProgressSidebar } from "@/features/navigation";
+import { PyodideProvider, PyodideStatus } from "@/features/editor";
+import { ThemeProvider } from "@/shared/lib/theme-context";
+import { AuthProvider } from "@/features/auth";
+import { ErrorBoundary, SidebarErrorFallback } from "@/shared/ui";
 
 // =============================================================================
 // Font Configuration - Optimized for performance
@@ -56,8 +55,6 @@ export const viewport: Viewport = {
     { media: '(prefers-color-scheme: dark)', color: '#0C0A10' },
   ],
 };
-
-import SidebarErrorFallback from "@/components/SidebarErrorFallback";
 
 // =============================================================================
 // Layout Component

@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev              # Start dev server
+npm run dev              # Start dev server (localhost:3000)
 npm run build            # Production build
 npm run build:manifest   # Regenerate curriculum manifest
 npm run lint             # ESLint
@@ -17,43 +17,77 @@ npm run lint             # ESLint
 # Testing
 npm run test             # Run unit tests (vitest)
 npm run test:ui          # Run tests with UI
-npm run test -- src/components/__tests__/MyComponent.test.tsx  # Single test file
-npm run test:e2e         # Run e2e tests (playwright, starts dev server)
+npm run test -- src/features/editor/components/__tests__/LightEditor.test.tsx  # Single test
+npm run test:e2e         # Run e2e tests (playwright)
 npm run test:e2e:ui      # Run e2e tests with UI
 
 # Storybook
 npm run storybook        # Component playground on :6006
-
-# Sandbox (Docker-based Python execution)
-npm run sandbox          # Start sandbox container
-npm run sandbox:start    # Alias for sandbox
 ```
 
-## Directory Structure
+### Important: Webpack vs Turbopack
 
+This project uses **webpack** (not Turbopack) for the dev server. Next.js 16 defaults to Turbopack, but it has known issues with Tailwind CSS JIT compilation that cause critical layout bugs (utility classes like `w-72`, `flex-shrink-0` not being generated).
+
+```bash
+# ✅ CORRECT - Uses webpack (configured in package.json)
+npm run dev
+
+# ❌ DON'T DO THIS - Turbopack breaks Tailwind CSS
+next dev --turbopack
 ```
-├── src/                    # Source code
-│   ├── app/               # Next.js App Router
-│   │   ├── api/           # API routes
-│   │   ├── auth/          # OAuth callback & error
-│   │   ├── lessons/       # Dynamic lesson pages
-│   │   └── projects/      # Project workspace pages
-│   ├── components/        # React components
-│   │   ├── ui/            # Primitive UI components
-│   │   └── editor/        # Monaco editor themes
-│   ├── lib/               # Utilities & contexts
-│   │   ├── supabase/      # Supabase clients
-│   │   └── progress/      # Progress store
-│   └── content/           # Curriculum
-│       └── python/        # Lesson markdown + project folders
-├── public/                # Static assets
-│   └── workers/           # Pyodide web worker
-├── scripts/               # Build scripts
-├── data/                  # Local progress (gitignored)
-└── [config files]
-```
+
+If you see layout issues (sidebar too wide, broken flex layouts), verify the dev server shows `(webpack)` not `(Turbopack)` in the startup message.
 
 ## Architecture
+
+### Feature-Based Module Structure
+
+```
+src/
+├── features/              # Domain-specific modules
+│   ├── editor/           # Code editor, Pyodide, syntax highlighting
+│   ├── lessons/          # Lesson rendering, markdown plugins
+│   ├── projects/         # Project workspace (3-panel layout)
+│   ├── progress/         # Progress tracking (client hooks + server utils)
+│   ├── auth/             # GitHub OAuth authentication
+│   └── navigation/       # Sidebar, dashboard, stats
+├── shared/
+│   ├── ui/               # Reusable UI components (Button, Card, etc.)
+│   └── lib/              # Shared utilities (cn, theme-context)
+├── lib/
+│   └── supabase/         # Supabase clients (unchanged)
+├── app/                  # Next.js App Router
+└── content/              # Curriculum markdown + manifest
+```
+
+### Import Conventions
+
+Use feature public APIs via barrel exports:
+```typescript
+// ✅ GOOD - Import from feature barrel
+import { CodeRunner, usePyodide } from '@/features/editor'
+import { LessonRenderer, getLesson } from '@/features/lessons'
+import { Button, ErrorBoundary } from '@/shared/ui'
+
+// ⚠️ Client components importing from features with server-only code
+// must import from specific files to avoid bundling fs modules:
+import { useLessonContext } from '@/features/lessons/lib/lesson-context'
+import { useProgress } from '@/features/progress/hooks/use-progress'
+```
+
+### Module Boundaries
+
+| Module | Can Import From |
+|--------|-----------------|
+| `features/editor` | `shared/*`, `lib/supabase` |
+| `features/lessons` | `shared/*`, `features/editor` |
+| `features/projects` | `shared/*`, `features/editor`, `features/progress` |
+| `features/progress` | `shared/*`, `features/auth`, `lib/supabase` |
+| `features/auth` | `shared/*`, `lib/supabase` |
+| `features/navigation` | `shared/*`, `features/progress`, `features/auth` |
+| `shared/*` | `lib/*` only |
+| `app/*` | All features (via public APIs) |
 
 ### Content Pipeline
 
@@ -67,88 +101,24 @@ content/python/**/*.md → build-manifest.ts → manifest.json
         remark/rehype plugins       Three-panel layout
                     │                       │
         CodeRunner.tsx              ProjectEditor.tsx
-        (embedded exercises)        (multi-file editor)
 ```
 
 ### Lessons vs Projects
 
-- **Lessons** (`/lessons/[...slug]`): Markdown content with embedded code exercises
-- **Projects** (`/projects/[...slug]`): Three-panel workspace for larger coding tasks
+- **Lessons** (`/lessons/[...slug]`): Markdown with embedded code exercises
+- **Projects** (`/projects/[...slug]`): Three-panel workspace (Instructions | Editor | Output)
 
-Projects are detected by folder name pattern (`*_project_*`) and have `isProject: true` in the manifest.
-
-### Auth & Progress
-
-- `lib/auth-context.tsx` — Authentication state (GitHub OAuth)
-- `lib/use-progress.ts` — Routes to cloud (authenticated) or local (anonymous)
-- `lib/cloud-progress.ts` — Supabase progress sync
-- `lib/progress.ts` — Local file-based progress
+Projects detected by folder name pattern (`*_project_*`) → `isProject: true` in manifest.
 
 ### Pyodide Integration
 
-- `public/workers/pyodide.worker.js` — Web Worker loading Pyodide
-- `lib/pyodide-context.tsx` — React context with `runCode()`, `validateCode()`
+- Web Worker at `public/workers/pyodide.worker.js`
+- Context: `usePyodide()` provides `runCode()`, `validateCode()`, `checkExpected()`
 - 5-second execution timeout, ~10MB initial download (cached)
-
-### Project Workspace
-
-Three-panel layout: **Instructions | Editor | Output**
-
-```
-┌──────────────────┬─────────────────────────────┬───────────────────┐
-│   INSTRUCTIONS   │          EDITOR             │      OUTPUT       │
-│     (~280px)     │          (~55%)             │      (~25%)       │
-├──────────────────┼─────────────────────────────┼───────────────────┤
-│  Markdown from   │  main.py               [+]  │  >>> Running...   │
-│  project README  │  print("Hello!")            │  Hello, World!    │
-│                  │                    [▶ Run]  │  ✓ 0.23s          │
-└──────────────────┴─────────────────────────────┴───────────────────┘
-```
-
-Components:
-- `ProjectWorkspace.tsx` — Main container with CSS Grid, state management
-- `ProjectInstructions.tsx` — Scrollable markdown panel
-- `ProjectEditor.tsx` — Multi-file tabbed editor wrapping LightEditor
-- `ProjectOutput.tsx` — Console output with copy/clear/submit
-- `ResizableDivider.tsx` — Draggable panel dividers
-
-Features:
-- Auto-saves to localStorage (debounced)
-- Mobile: Stacks vertically with floating "Requirements" button
-- Project validation via `validateCode()` from Pyodide context
-- Progress tracking on successful validation
-
-### Theme System
-
-Two themes: Ivory (light) and Velvet (dark).
-
-- CSS variables in `app/globals.css` with `[data-theme="dark"]`
-- Use `var(--*)` or semantic Tailwind classes, never hardcoded colors
-
-## Manifest Structure
-
-The curriculum manifest (`src/content/manifest.json`) is generated by `npm run build:manifest`:
-
-```json
-{
-  "phases": [
-    {
-      "id": "01_foundations",
-      "title": "Python Foundations",
-      "lessons": [
-        { "id": "01_foundations/1.1_hello_world", "title": "Hello World" },
-        { "id": "01_foundations/1.7_project_number_analyzer", "title": "Number Analyzer", "isProject": true }
-      ]
-    }
-  ]
-}
-```
-
-- `isProject: true` — Detected by folder name pattern (`*_project_*`)
-- Projects link to `/projects/[slug]`, lessons to `/lessons/[slug]`
 
 ## Code Block Syntax
 
+In lesson markdown files:
 ```markdown
 ~~~python runnable
 print("Hello")          # Editable + runnable
@@ -161,6 +131,10 @@ print(6 * 7)            # Validates stdout
 ~~~python exercise id="1.2" validate="assert result == 100"
 # Runs assertion after user code
 ~~~
+
+~~~python exercise id="1.3" hints="Use a for loop|Remember range()"
+# Progressive hints, pipe-separated
+~~~
 ```
 
 ## TypeScript
@@ -168,52 +142,35 @@ print(6 * 7)            # Validates stdout
 Strict mode with `noUncheckedIndexedAccess: true`:
 ```typescript
 const item = arr[0]      // Type: T | undefined
-const value = item ?? '' // Handle undefined
+const value = item ?? '' // Handle undefined explicitly
 ```
 
-## Security & Deployment
+## Theme System
 
-### Environment Variables
+Two themes: Ivory (light) and Velvet (dark).
 
-- **`.env`** — Local secrets (gitignored)
-- **`.env.example`** — Template with variable names only (committed)
-- Only `NEXT_PUBLIC_*` prefixed variables are exposed to the browser
-- Supabase anon key is safe to expose (designed for client-side use with RLS)
+```tsx
+// ✅ GOOD - CSS variables
+className="bg-[var(--bg-surface)] text-[var(--text-primary)]"
 
-**Required variables:**
+// ❌ BAD - Hardcoded colors
+className="bg-white text-gray-900"
+```
+
+Access via `useTheme()` from `@/shared/lib/theme-context`.
+
+## Environment Variables
+
+Required in `.env`:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-### Security Headers
+Only `NEXT_PUBLIC_*` variables are exposed to browser.
 
-Configured in both `next.config.mjs` and `vercel.json`:
-- `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: DENY`
-- `X-XSS-Protection: 1; mode=block`
-- `Referrer-Policy: strict-origin-when-cross-origin`
-- `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+## Security
 
-Pyodide workers require additional COOP/COEP headers (configured separately).
-
-### Never Commit
-
-- `.env` files (except `.env.example`)
-- API keys, secrets, tokens
-- Database credentials
-- Private keys (`*.pem`)
-
-### Vercel Deployment
-
-- **Auto-deploy**: Pushes to `main` trigger production deploys
-- **Preview deploys**: PRs get preview URLs automatically
-- **Environment variables**: Set in Vercel Dashboard → Settings → Environment Variables
-- **GitHub Actions**: CI runs lint, type-check, and build on PRs
-
-### GitHub Best Practices
-
-- **Dependabot**: Enabled for weekly dependency updates
-- **Branch protection**: Require PR reviews and CI passing
-- **Secret scanning**: Enabled by default on public repos
-- **PR template**: Use `.github/PULL_REQUEST_TEMPLATE.md`
+- Security headers configured in `next.config.mjs` and `vercel.json`
+- Pyodide workers require COOP/COEP headers (configured for `/workers/` path)
+- Never commit `.env` files, API keys, or credentials

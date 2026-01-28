@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { usePyodide } from '@/lib/pyodide-context'
+import { usePyodide } from '@/features/editor/lib/pyodide-context'
 
 /**
  * PyodidePreloader

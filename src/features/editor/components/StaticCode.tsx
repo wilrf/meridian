@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { tokenize, getTokenClass } from '@/lib/python-tokenizer'
+import { tokenize, getTokenClass } from '@/features/editor/lib/python-tokenizer'
 
 interface StaticCodeProps {
   /** The code content */
